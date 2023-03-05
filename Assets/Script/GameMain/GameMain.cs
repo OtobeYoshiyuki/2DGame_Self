@@ -21,9 +21,6 @@ namespace OtobeGame
         //シーンの管理クラス
         private SceneManager m_sceneManager = null;
 
-        //キャラクターの管理クラス
-        private CharaManager m_characterManager = null;
-
         //ステータスの管理クラス
         private StatusManager m_statusManager = null;
 
@@ -50,24 +47,15 @@ namespace OtobeGame
             //最初のシーンをプレイシーンに設定する
             m_sceneManager.ChangeScene(PlayScene.SCENE_NAME);
 
-            //CharacterManagerを探す
-            m_characterManager = GameObject.Find(CharaManager.OBJECT_NAME).GetComponent<CharaManager>();
-
             //StatusManagerを探す
             m_statusManager = GameObject.Find(StatusManager.OBJECT_NAME).GetComponent<StatusManager>();
             m_statusManager.Init();
-
-            FileManager fileManager = new FileManager();
-            fileManager.InputDataCsv("character_Status");
 
             //サービスロケーターにGameMainを登録する
             Locater.Bind(this);
 
             //サービスロケーターにInputCsを登録する
             Locater.Bind(m_inputCs);
-
-            //サービスロケーターにcharaManagerを登録する
-            Locater.Bind(m_characterManager);
 
             //サービスロケーターにstatusManagerを登録する
             Locater.Bind(m_statusManager);
