@@ -9,9 +9,6 @@ namespace OtobeGame
     /// </summary>
     public class CharaManager : MonoBehaviour
     {
-        //オブジェクトの名前
-        public const string OBJECT_NAME = "CharaManager";
-
         //処理の順番の列挙体
         public enum ORDER_CHARACTER : int
         {
@@ -57,7 +54,7 @@ namespace OtobeGame
         {
             //処理順にソートする（昇順）
             m_allCharacters.Sort((x, y) => x.orderBy - y.orderBy);
-            //m_enemyCharacters.Sort();
+            m_enemyCharacters.Sort((x, y) => x.orderBy - y.orderBy);
 
             foreach (Character ch in m_allCharacters)
             {

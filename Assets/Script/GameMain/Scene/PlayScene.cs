@@ -13,14 +13,20 @@ namespace OtobeGame
         //シーンの名前
         public const string SCENE_NAME = "PlayScene";
 
+        //キャラクターの管理クラス
+        private CharaManager m_characterManager = null;
+
         /// <summary>
         /// 初期化処理
         /// </summary>
         public void Init()
         {
-            //CharacterManagerを更新する
-            CharaManager charaManager = Locater.Get<CharaManager>();
-            charaManager.InitCharaManager();
+            //CharacterManagerを初期化する
+            m_characterManager = new CharaManager();
+            m_characterManager.InitCharaManager();
+
+            //サービスロケーターにcharaManagerを登録する
+            Locater.Bind(m_characterManager);
         }
 
         /// <summary>
@@ -29,8 +35,7 @@ namespace OtobeGame
         public void Update()
         {
             //CharacterManagerを更新する
-            CharaManager charaManager = Locater.Get<CharaManager>();
-            charaManager.UpdateCharacters();
+            m_characterManager.UpdateCharacters();
         }
 
         /// <summary>
@@ -40,8 +45,7 @@ namespace OtobeGame
         public void FixedUpdate()
         {
             //CharacterManagerを更新する
-            CharaManager charaManager = Locater.Get<CharaManager>();
-            charaManager.FixedUpdateCharacters();
+            m_characterManager.FixedUpdateCharacters();
         }
 
         /// <summary>
@@ -51,8 +55,7 @@ namespace OtobeGame
         public void LateUpdate()
         {
             //CharacterManagerを更新する
-            CharaManager charaManager = Locater.Get<CharaManager>();
-            charaManager.LateUpdateCharacters();
+            m_characterManager.LateUpdateCharacters();
         }
 
         /// <summary>
