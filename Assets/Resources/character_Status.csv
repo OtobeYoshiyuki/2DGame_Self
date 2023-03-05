@@ -1,0 +1,17 @@
+﻿キャラクターのステータスを扱うファイル
+
+データベースの情報　ここから
+Fighter
+Hp,100
+Atack_punch,20
+Atack_kick,30
+Atack_crouchKick,15
+Atack_flyingKick,40
+Atack_treadOn,10
+Defence,10
+データベースの情報　ここまで
+
+キャラクターの情報（ゲーム中に変動する値）　ここから
+Fighter
+Hp,100
+キャラクターの情報（ゲーム中に変動する値）　ここまで
