@@ -11,18 +11,19 @@ namespace OtobeLib
     {
         //オブジェクトの回転値
         protected Vector3 m_rotAngle = Vector3.zero;
+        public Vector3 rotAngle { get { return m_rotAngle; } set { m_rotAngle = value; } }
 
         //オブジェクトを移動させるスピード
         protected Vector3 m_moveSpeed = Vector3.zero;
+        public Vector3 moveSpeed { get { return m_moveSpeed; } set { m_moveSpeed = value; } }
 
         //オブジェクトをスケーリングさせるスピード
         protected Vector3 m_scaleSpeed = Vector3.zero;
+        public Vector3 scaleSpeed { get { return m_scaleSpeed; } set { m_scaleSpeed = value; } }
 
-        // RigidBody2DのComponent
+        //2Dの物理演算を処理するComponent
         protected Rigidbody2D m_rigidBody2D = null;
-
-        // アニメーションのステートマシーン
-        protected Animator m_animator = null;
+        public Rigidbody2D rigidBody2D { get { return m_rigidBody2D; } }
 
         /// <summary>
         /// 移動処理
@@ -49,34 +50,6 @@ namespace OtobeLib
         {
 
         }
-
-        /// <summary>
-        /// 回転の値
-        /// </summary>
-        public Vector3 rotAngle
-        {
-            get { return m_rotAngle; }
-            set { m_rotAngle = value; }
-        }
-
-        /// <summary>
-        /// 1フレームに移動させる値
-        /// </summary>
-        public Vector3 moveSpeed
-        {
-            get { return m_moveSpeed; }
-            set { m_moveSpeed = value; }
-        }
-
-        /// <summary>
-        /// RigidBody2Dを取得する
-        /// </summary>
-        public Rigidbody2D rigidBody2D { get { return m_rigidBody2D; } }
-
-        /// <summary>
-        /// アニメーターのステートマシーン
-        /// </summary>
-        public Animator animator { get { return m_animator; } }
     }
 }
 

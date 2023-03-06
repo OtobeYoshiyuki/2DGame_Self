@@ -53,15 +53,6 @@ public partial class @InputCs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""FIre2"",
-                    ""type"": ""Button"",
-                    ""id"": ""b74875b5-0240-42d0-82c1-ef3beddf25ea"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -282,17 +273,6 @@ public partial class @InputCs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""XR"",
                     ""action"": ""Fire"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""827bf70e-5632-43ac-a9e7-aa821f670790"",
-                    ""path"": ""<Keyboard>/a"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""FIre2"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -883,7 +863,6 @@ public partial class @InputCs : IInputActionCollection2, IDisposable
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
-        m_Player_FIre2 = m_Player.FindAction("FIre2", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -958,7 +937,6 @@ public partial class @InputCs : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Fire;
-    private readonly InputAction m_Player_FIre2;
     public struct PlayerActions
     {
         private @InputCs m_Wrapper;
@@ -966,7 +944,6 @@ public partial class @InputCs : IInputActionCollection2, IDisposable
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputAction @Fire => m_Wrapper.m_Player_Fire;
-        public InputAction @FIre2 => m_Wrapper.m_Player_FIre2;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -985,9 +962,6 @@ public partial class @InputCs : IInputActionCollection2, IDisposable
                 @Fire.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
                 @Fire.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
                 @Fire.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFire;
-                @FIre2.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFIre2;
-                @FIre2.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFIre2;
-                @FIre2.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFIre2;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -1001,9 +975,6 @@ public partial class @InputCs : IInputActionCollection2, IDisposable
                 @Fire.started += instance.OnFire;
                 @Fire.performed += instance.OnFire;
                 @Fire.canceled += instance.OnFire;
-                @FIre2.started += instance.OnFIre2;
-                @FIre2.performed += instance.OnFIre2;
-                @FIre2.canceled += instance.OnFIre2;
             }
         }
     }
@@ -1163,7 +1134,6 @@ public partial class @InputCs : IInputActionCollection2, IDisposable
         void OnMove(InputAction.CallbackContext context);
         void OnLook(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
-        void OnFIre2(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

@@ -15,6 +15,12 @@ namespace OtobeGame
         //0を扱う定数
         public const int NULL = 0;
 
+        //右矢印キーが押された時の定数
+        public const float RIGHTPUSH = 1.0f;
+
+        //左矢印キーが押された時の定数
+        public const float LEFTPUSH = -1.0f;
+
         //キー入力の制御クラス
         private InputCs m_inputCs = null;
 

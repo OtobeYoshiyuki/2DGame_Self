@@ -45,22 +45,13 @@ namespace OtobeGame
     /// </summary>
     public abstract class Character : Movement, ICharacter
     {
-        /// <summary>
-        /// HPステータスのkey
-        /// 定数
-        /// </summary>
+        // HPステータスのkey
         public const string HP = "Hp";
 
-        /// <summary>
-        /// Atackステータスのkey
-        /// 定数
-        /// </summary>
+        // Atackステータスのkey
         public const string ATACK = "Atack";
 
-        /// <summary>
-        /// Defenceステータスのkey
-        /// 定数
-        /// </summary>
+        // Defenceステータスのkey
         public const string DEFENCE = "Defence";
 
         // Stateの時間を計測する時間
@@ -78,6 +69,7 @@ namespace OtobeGame
 
         // ステータスのコントローラー
         private StatusController m_statusCs = new StatusController();
+        public StatusController statusCs { get { return m_statusCs; } }
 
         /// <summary>
         /// キャラクターの初期化
@@ -92,6 +84,7 @@ namespace OtobeGame
 
             //ステータスをコントローラーに渡す
             m_statusCs.AddStatuses(infos);
+
         }
 
         /// <summary>

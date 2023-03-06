@@ -30,9 +30,9 @@ namespace OtobeGame
         /// </summary>
         public void InitCharaManager()
         {
-            //操作キャラを取得する
+            //操作キャラを生成する
             GameObject gameObject = (GameObject)Resources.Load("Fighter");
-            m_heroCharacter = gameObject.GetComponent<Fighter>(); ;
+            m_heroCharacter = Instantiate(gameObject).GetComponent<Fighter>();
             m_heroCharacter.InitCharacter();
 
             //敵キャラのコンテナを生成する
@@ -100,6 +100,8 @@ namespace OtobeGame
             //Heroを継承したスクリプトを返す
             return GameObject.Find(tag).GetComponent<T>();
         }
+
+        public Hero GetHero() { return m_heroCharacter; }
     }
 
 }
