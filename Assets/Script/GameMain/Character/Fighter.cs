@@ -10,24 +10,57 @@ using OtobeLib;
 /// </summary>
 public class Fighter : Hero
 {
+    //アニメーションの列挙体を用意する
     public enum FITER_ANIMATION
     {
         NONE = 0,       //無
         IDLE,           //呼吸
         WALK,           //歩く
+        JUMP,           //ジャンプ
+        FALL,           //落下
+        CROUCH,         //しゃがむ
     }
+
+    //Fighterの子供の列挙体を定義
+    public enum CHILD_OBJECT
+    {
+        BODY = 0,       //体
+        ARM,            //腕
+        FOOT,           //足
+    }
+
+    //子供（足）の当たり判定を検出するクラス
+    HitChecker_Collider m_footCollider = null;
+    public HitChecker_Collider footCollider { get { return m_footCollider; } }
 
     //状態遷移を管理するステートマシーン
     private StateMachine<Fighter> m_stateMachine = null;
     public StateMachine<Fighter> stateMachine { get { return m_stateMachine; } }
 
     //ステート（呼吸の状態）
-    private FighterIdel m_idelState = null;
-    public FighterIdel idelState { get { return m_idelState; } }
+    [SerializeField]
+    private FighterIdele m_ideleState = new FighterIdele();
+    public FighterIdele ideleState { get { return m_ideleState; } }
 
     //ステート（歩く状態）
-    private FighterWalk m_walkState = null;
+    [SerializeField]
+    private FighterWalk m_walkState = new FighterWalk();
     public FighterWalk walkState { get { return m_walkState; } }
+
+    //ステート（ジャンプ状態）
+    [SerializeField]
+    private FighterJump m_jumpState = new FighterJump();
+    public FighterJump jumpState { get { return m_jumpState; } }
+
+    //ステート（落下状態）
+    [SerializeField]
+    private FighterFall m_fallState = new FighterFall();
+    public FighterFall fallState { get { return m_fallState; } }
+
+    //ステート（しゃがむ状態）
+    [SerializeField]
+    private FighterCrounch m_crounchState = new FighterCrounch();
+    public FighterCrounch crounchState { get { return m_crounchState; } }
 
 
     /// <summary>
@@ -41,12 +74,11 @@ public class Fighter : Hero
         //処理の順番を設定する
         orderBy = CharaManager.ORDER_CHARACTER.FIGHTER;
 
-        //各ステートを生成する
-        m_idelState = new FighterIdel();
-        m_walkState = new FighterWalk();
-
         //ステートマシーンを生成する
-        m_stateMachine = new StateMachine<Fighter>(this, m_idelState);
+        m_stateMachine = new StateMachine<Fighter>(this, m_ideleState);
+
+        //子供にアタッチされている当たり判定用のスクリプトを取得する
+        m_footCollider = transform.GetChild((int)CHILD_OBJECT.FOOT).gameObject.GetComponent<HitChecker_Collider>();
     }
 
     /// <summary>

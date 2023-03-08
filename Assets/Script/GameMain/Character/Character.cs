@@ -56,6 +56,7 @@ namespace OtobeGame
 
         // Stateの時間を計測する時間
         private float m_time = 0.0f;
+        public float time { get { return m_time; } set { m_time = value; } }
 
         // Starの衝突をチェックするフラグ
         private bool m_damageCheck = false;
@@ -68,8 +69,13 @@ namespace OtobeGame
         public CharaManager.ORDER_CHARACTER orderBy { get { return m_orderBy; } set { m_orderBy = value; } }
 
         // ステータスのコントローラー
-        private StatusController m_statusCs = new StatusController();
+        private StatusController m_statusCs = null;
         public StatusController statusCs { get { return m_statusCs; } }
+
+        //アニメーター
+        private Animator m_animator = null;
+        public Animator animator { get { return m_animator; } }
+        
 
         /// <summary>
         /// キャラクターの初期化
@@ -82,8 +88,17 @@ namespace OtobeGame
             //自身のステータスの情報を取得する
             List<StatusInfo> infos = statusManager.GetStatusInfoArray(gameObject.tag);
 
+            //ステータスのコントローラーを生成する
+            m_statusCs = new StatusController();
+
             //ステータスをコントローラーに渡す
             m_statusCs.AddStatuses(infos);
+
+            //アニメーターを取得する
+            m_animator = gameObject.GetComponent<Animator>();
+
+            //RigidBody2Dを取得する
+            m_rigidBody2D = gameObject.GetComponent<Rigidbody2D>();
 
         }
 
@@ -92,14 +107,6 @@ namespace OtobeGame
         /// </summary>
         public virtual void UpdateCharacter()
         {
-            //キャラクターを移動させる
-            Move();
-
-            //キャラクターを回転させる
-            Rotation();
-
-            //キャラクターを回転
-            Scaling();
         }
 
         /// <summary>
