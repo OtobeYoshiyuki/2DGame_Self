@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using OtobeLib;
+using UnityEngine.InputSystem;
 
 
 namespace OtobeGame
@@ -22,9 +23,6 @@ namespace OtobeGame
         //左矢印キーが押された時の定数
         public const float LEFTPUSH = -1.0f;
 
-        //キー入力の制御クラス
-        private InputCs m_inputCs = null;
-
         //シーンの管理クラス
         private SceneManager m_sceneManager = null;
 
@@ -36,12 +34,6 @@ namespace OtobeGame
         /// </summary>
         private void Start()
         {
-            //キー入力の制御クラスを生成する
-            m_inputCs = new InputCs();
-
-            //キー入力を利用可能な状態にする
-            m_inputCs.Enable();
-
             //シーンの制御クラスを生成する
             m_sceneManager = new SceneManager();
             m_sceneManager.Init();
@@ -60,9 +52,6 @@ namespace OtobeGame
 
             //サービスロケーターにGameMainを登録する
             Locater.Bind(this);
-
-            //サービスロケーターにInputCsを登録する
-            Locater.Bind(m_inputCs);
 
             //サービスロケーターにstatusManagerを登録する
             Locater.Bind(m_statusManager);

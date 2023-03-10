@@ -22,15 +22,15 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            //InputSystemを取得する
-            InputCs inputActions = Locater.Get<InputCs>();
-            Vector2 direct = inputActions.Player.Move.ReadValue<Vector2>();
+            //キーから入力された値を取得する
+            Vector2 direct = owner.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
 
             //キーの入力が1or-1の時
             if (!Mathf.Approximately(direct.x, 0.0f))
             {
                 //ダッシュに割り当てられたキーが押されている間、アニメーションの速度を変更する
-                if (inputActions.Player.Dash.IsPressed()) owner.animator.SetFloat("moveSpeed", owner.walkState.runMotion);
+                if (owner.playerInput.currentActionMap["Dash"].IsPressed()) 
+                    owner.animator.SetFloat("moveSpeed", owner.walkState.runMotion);
                 //キーが離されたら、アニメーションの速度をもとに戻す
                 else owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
 
@@ -47,9 +47,25 @@ namespace OtobeGame
                 owner.time = 0.0f;
             }
 
-            //着地したら、ステートを切り替える
+            //着地した
             if (owner.footCollider.isCollision)
+            {
+                //ステートを切り替える
                 owner.stateMachine.ChangeState(owner.ideleState);
+
+                //空中蹴りのフラグを初期化する
+                owner.flyingKickState.isAtack = false;
+            }
+
+            //空中でキックに対応するキーが押されていて、まだ攻撃していないとき
+            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame() && !owner.flyingKickState.isAtack)
+            {
+                //ステートを切り替える
+                owner.stateMachine.ChangeState(owner.flyingKickState);
+
+                //攻撃フラグを立てる
+                owner.flyingKickState.isAtack = true;
+            }
         }
 
         /// <summary>
