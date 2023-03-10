@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using OtobeLib;
 
 namespace OtobeGame
 {
@@ -31,14 +33,14 @@ namespace OtobeGame
         public void InitCharaManager()
         {
             //操作キャラを生成する
-            GameObject gameObject = (GameObject)Resources.Load("Fighter");
-            GameObject fighterObject = Instantiate(gameObject);
-            m_heroCharacter = fighterObject.GetComponent<Fighter>();
+            PlayerInput playerInput = PlayerInputManager.instance.JoinPlayer(0, -1, "Gamepad", Gamepad.current);
+            GameObject gameObject = playerInput.gameObject;
+            m_heroCharacter = gameObject.GetComponent<Fighter>();
             m_heroCharacter.InitCharacter();
 
             //InstantiateされたオブジェクトはManagerSceneに作られるため、PlaySceneに移動させる
             UnityEngine.SceneManagement.Scene playScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(PlayScene.SCENE_NAME);
-            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(fighterObject, playScene);
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(gameObject, playScene);
 
             //敵キャラのコンテナを生成する
             m_enemyCharacters = new List<Enemy>();
@@ -64,7 +66,7 @@ namespace OtobeGame
             foreach (Character ch in m_allCharacters)
             {
                 //全キャラクターの更新をする
-                ch.UpdateCharacter();
+                ch?.UpdateCharacter();
             }
         }
 
@@ -77,7 +79,7 @@ namespace OtobeGame
             foreach (Character ch in m_allCharacters)
             {
                 //全キャラクターの更新をする
-                ch.FixedUpdateCharacter();
+                ch?.FixedUpdateCharacter();
             }
         }
 
@@ -90,7 +92,7 @@ namespace OtobeGame
             foreach (Character ch in m_allCharacters)
             {
                 //全キャラクターの更新をする
-                ch.LateUpdateCharacter();
+                ch?.LateUpdateCharacter();
             }
         }
 

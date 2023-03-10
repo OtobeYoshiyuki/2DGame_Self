@@ -22,20 +22,26 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner) 
         {
-            //InputSystemを取得する
-            InputCs inputActions = Locater.Get<InputCs>();
-
             //キーから入力された値を取得する
-            Vector2 vel = inputActions.Player.Move.ReadValue<Vector2>();
+            Vector2 vel = owner.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
 
             //ジャンプに対応するキーが押された時、ステートを切り替える
-            if (inputActions.Player.Jump.WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.jumpState);
+            if (owner.playerInput.currentActionMap["Jump"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.jumpState);
 
             //しゃがみに対応するキーが押された時、ステートを切り替える
-            else if (inputActions.Player.Crounch.WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.crounchState);
+            else if (owner.playerInput.currentActionMap["Crounch"].IsPressed()) owner.stateMachine.ChangeState(owner.crounchState);
 
             //左右の矢印が押された時、ステートを切り替える
             else if (!Mathf.Approximately(vel.x, 0.0f)) owner.stateMachine.ChangeState(owner.walkState);
+
+            //滑って落ちたら、ステートを切り替える
+            else if (!owner.footCollider.isCollision) owner.stateMachine.ChangeState(owner.fallState);
+
+            //パンチに対応するキーが押された時、ステートを切り替える
+            else if (owner.playerInput.currentActionMap["Punch"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.punchState);
+
+            //キックに対応するキーが押された時、ステートを切り替える
+            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.kickState);
         }
 
         /// <summary>
@@ -43,7 +49,12 @@ namespace OtobeGame
         /// ※物理演算を伴う更新
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
-        public override void OnFixedExecute(Fighter owner) { }
+        public override void OnFixedExecute(Fighter owner)
+        {
+            //移動速度を初期化する
+            owner.rigidBody2D.velocity = Vector2.zero;
+            owner.rigidBody2D.angularVelocity = 0.0f;
+        }
 
         /// <summary>
         /// Stateの実行処理
@@ -65,12 +76,9 @@ namespace OtobeGame
             owner.animator.SetInteger("Fighter_Anime", (int)Fighter.FITER_ANIMATION.IDLE);
             owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
 
-            //移動速度を初期化する
-            owner.rigidBody2D.velocity = Vector2.zero;
-            owner.rigidBody2D.angularVelocity = 0.0f;
-
             //Stateの計測時間を初期化する
             owner.time = 0.0f;
+
         }
 
         /// <summary>

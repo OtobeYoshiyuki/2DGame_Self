@@ -21,15 +21,15 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            //InputSystemを取得する
-            InputCs inputActions = Locater.Get<InputCs>();
-            Vector2 direct = inputActions.Player.Move.ReadValue<Vector2>();
+            //キーから入力された値を取得する
+            Vector2 direct = owner.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
 
             //キーの入力が1or-1の時
             if (!Mathf.Approximately(direct.x, 0.0f))
             {
                 //ダッシュに割り当てられたキーが押されている間、アニメーションの速度を変更する
-                if (inputActions.Player.Dash.IsPressed()) owner.animator.SetFloat("moveSpeed", owner.walkState.runMotion);
+                if (owner.playerInput.currentActionMap["Dash"].IsPressed()) 
+                    owner.animator.SetFloat("moveSpeed", owner.walkState.runMotion);
                 //キーが離されたら、アニメーションの速度をもとに戻す
                 else owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
 
@@ -50,7 +50,17 @@ namespace OtobeGame
             if (owner.rigidBody2D.velocity.y <= owner.fallState.fallPower)
                 owner.stateMachine.ChangeState(owner.fallState);
 
-            
+            //空中でキックに対応するキーが押された時
+            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
+            {
+                //ステートを切り替える
+                owner.stateMachine.ChangeState(owner.flyingKickState);
+
+                //攻撃フラグを立てる
+                owner.flyingKickState.isAtack = true;
+            }
+
+
         }
 
         /// <summary>
@@ -91,7 +101,10 @@ namespace OtobeGame
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
         /// <param name="nextState">次のState</param>
-        public override void OnExit(Fighter owner, StateBase<Fighter> nextState) { }
+        public override void OnExit(Fighter owner, StateBase<Fighter> nextState) 
+        { 
+            
+        }
     }
 
 }
