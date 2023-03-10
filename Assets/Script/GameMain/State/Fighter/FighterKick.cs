@@ -1,29 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using OtobeLib;
+using UnityEngine.InputSystem;
 
-namespace OtobeGame
+namespace OtobeLib
 {
     /// <summary>
-    /// ステート（しゃがむ状態）
+    /// ステート（キックの状態）
     /// </summary>
     [System.Serializable]
-    public class FighterCrounch : StateBase<Fighter>
+    public class FighterKick : StateBase<Fighter>
     {
+        //アニメーションの終了する時間
+        [SerializeField]
+        private float m_finishAnime = 1.0f;
+
         /// <summary>
         /// Stateの実行処理
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            //しゃがみに対応するキーが離された時は、ステートを切り替える
-            if (!owner.playerInput.currentActionMap["Crounch"].IsPressed()) owner.stateMachine.ChangeState(owner.ideleState);
+            //キックのアニメーションが終了したら、ステートを切り替える
+            if (owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= m_finishAnime)
+                owner.stateMachine.ChangeState(owner.ideleState);
 
-            //キックに対応するキーが押された時、ステートを切り替える
-            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.crouchKickState);
-
-            //滑って落ちたら、ステートを切り替える
+            //キック中に落下したら、ステートを切り替える
             else if (!owner.footCollider.isCollision) owner.stateMachine.ChangeState(owner.fallState);
         }
 
@@ -53,10 +55,10 @@ namespace OtobeGame
         /// <param name="preState">前回のステート</param>
         public override void OnEnter(Fighter owner, StateBase<Fighter> preState)
         {
-            Debug.Log("しゃがみステート");
+            Debug.Log("キックステート");
 
-            //Fighterのアニメーションをしゃがみに切り替える
-            owner.animator.SetInteger("Fighter_Anime", (int)Fighter.FITER_ANIMATION.CROUCH);
+            //Fighterのアニメーションを呼吸に切り替える
+            owner.animator.SetInteger("Fighter_Anime", (int)Fighter.FITER_ANIMATION.KICK);
             owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
 
             //Stateの計測時間を初期化する
@@ -70,4 +72,5 @@ namespace OtobeGame
         /// <param name="nextState">次のState</param>
         public override void OnExit(Fighter owner, StateBase<Fighter> nextState) { }
     }
+
 }

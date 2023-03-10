@@ -29,12 +29,11 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            //キーによって方向を変える
-            InputCs inputActions = Locater.Get<InputCs>();
-            Vector2 direct = inputActions.Player.Move.ReadValue<Vector2>();
+            //Moveに割り当てられているキーの値を取得する
+            Vector2 direct = owner.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
 
             //ジャンプに対応するキーが押された時
-            if (inputActions.Player.Jump.WasPressedThisFrame())
+            if (owner.playerInput.currentActionMap["Jump"].WasPressedThisFrame())
                 //ジャンプのステートに切り替える
                 owner.stateMachine.ChangeState(owner.jumpState);
 
@@ -44,15 +43,21 @@ namespace OtobeGame
                 owner.stateMachine.ChangeState(owner.fallState);
 
             //しゃがみに対応するキーが押された時
-            else if(inputActions.Player.Crounch.WasPressedThisFrame())
+            else if (owner.playerInput.currentActionMap["Crounch"].IsPressed())
                 //しゃがみのステートに切り替える
                 owner.stateMachine.ChangeState(owner.crounchState);
 
-            //キーの入力が1or-1の時
+            //パンチに対応するキーが押された時、ステートを切り替える
+            else if (owner.playerInput.currentActionMap["Punch"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.punchState);
+
+            //キックに対応するキーが押された時、ステートを切り替える
+            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.kickState);
+
+            //キーの入力が1or - 1の時
             else if (!Mathf.Approximately(direct.x, 0.0f))
             {
                 //ダッシュに割り当てられたキーが押されている間、アニメーションの速度を変更する
-                if (inputActions.Player.Dash.IsPressed()) owner.animator.SetFloat("moveSpeed", m_runMotion);
+                if (owner.playerInput.currentActionMap["Dash"].IsPressed()) owner.animator.SetFloat("moveSpeed", m_runMotion);
                 //キーが離されたら、アニメーションの速度をもとに戻す
                 else owner.animator.SetFloat("moveSpeed", m_defaltMotion);
 

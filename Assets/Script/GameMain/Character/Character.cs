@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using OtobeLib;
 using OtobeGame;
+using UnityEngine.InputSystem;
 
 namespace OtobeGame
 {
@@ -75,7 +76,11 @@ namespace OtobeGame
         //アニメーター
         private Animator m_animator = null;
         public Animator animator { get { return m_animator; } }
-        
+
+        //playerInput
+        private PlayerInput m_playerInput = null;
+        public PlayerInput playerInput { get { return m_playerInput; } }
+
 
         /// <summary>
         /// キャラクターの初期化
@@ -100,6 +105,8 @@ namespace OtobeGame
             //RigidBody2Dを取得する
             m_rigidBody2D = gameObject.GetComponent<Rigidbody2D>();
 
+            //playerInputを取得する
+            m_playerInput = gameObject.GetComponent<PlayerInput>();
         }
 
         /// <summary>

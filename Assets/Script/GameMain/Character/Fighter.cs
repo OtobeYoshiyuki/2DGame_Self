@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using OtobeGame;
 using OtobeLib;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 格闘家のキャラクター
@@ -19,19 +20,29 @@ public class Fighter : Hero
         JUMP,           //ジャンプ
         FALL,           //落下
         CROUCH,         //しゃがむ
+        PUNCH,          //パンチ
+        KICK,           //キック
+        CROUCHKICK,     //しゃがみ蹴り
+        FLYINGKICK,     //とび膝蹴り
+        HURT,           //ダメージを受ける＆死亡
     }
 
     //Fighterの子供の列挙体を定義
     public enum CHILD_OBJECT
     {
-        BODY = 0,       //体
-        ARM,            //腕
-        FOOT,           //足
+        BODY = 0,       //体の判定
+        ARM,            //腕の攻撃判定
+        FOOT,           //着地用の判定
+        KICK,           //足の攻撃判定
     }
 
     //子供（足）の当たり判定を検出するクラス
     HitChecker_Collider m_footCollider = null;
     public HitChecker_Collider footCollider { get { return m_footCollider; } }
+
+    //子供（足の攻撃）の当たり判定を検出するクラス
+    HitChecker_Collider m_kickCollider = null;
+    public HitChecker_Collider kickCollider { get { return m_kickCollider; } }
 
     //状態遷移を管理するステートマシーン
     private StateMachine<Fighter> m_stateMachine = null;
@@ -62,6 +73,26 @@ public class Fighter : Hero
     private FighterCrounch m_crounchState = new FighterCrounch();
     public FighterCrounch crounchState { get { return m_crounchState; } }
 
+    //ステート（パンチ状態）
+    [SerializeField]
+    private FighterPunch m_punchState = new FighterPunch();
+    public FighterPunch punchState { get { return m_punchState; } }
+
+    //ステート（キック状態）
+    [SerializeField]
+    private FighterKick m_kickState = new FighterKick();
+    public FighterKick kickState { get { return m_kickState; } }
+
+    //ステート（しゃがみ蹴り状態）
+    [SerializeField]
+    private FighterCrouchKick m_crouchKickState = new FighterCrouchKick();
+    public FighterCrouchKick crouchKickState { get { return m_crouchKickState; } }
+
+    //ステート（空中蹴り状態）
+    [SerializeField]
+    private FighterFlyingKick m_flyingKickState = new FighterFlyingKick();
+    public FighterFlyingKick flyingKickState { get { return m_flyingKickState; } }
+
 
     /// <summary>
     /// キャラクターの初期化
@@ -79,6 +110,8 @@ public class Fighter : Hero
 
         //子供にアタッチされている当たり判定用のスクリプトを取得する
         m_footCollider = transform.GetChild((int)CHILD_OBJECT.FOOT).gameObject.GetComponent<HitChecker_Collider>();
+        m_kickCollider = transform.GetChild((int)CHILD_OBJECT.KICK).gameObject.GetComponent<HitChecker_Collider>();
+
     }
 
     /// <summary>
