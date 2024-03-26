@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using OtobeGame;
 
 namespace OtobeLib
 {
@@ -23,6 +24,13 @@ namespace OtobeLib
             //キックのアニメーションが終了したら、ステートを切り替える
             if (owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= m_finishAnime)
                 owner.stateMachine.ChangeState(owner.crounchState);
+
+            // 爆発物に当たったとき
+            else if (owner.kickCollider.CheckHitObject(ExBlockManager.EXPROSION_TAG))
+            {
+                // ブロックを爆発させる
+                owner.ExBlockBrakeStart(owner.kickCollider);
+            }
         }
 
         /// <summary>
@@ -50,7 +58,7 @@ namespace OtobeLib
         {
             Debug.Log("しゃがみ蹴りステート");
 
-            //Fighterのアニメーションを呼吸に切り替える
+            //Fighterのアニメーションをしゃがみ蹴りに切り替える
             owner.animator.SetInteger("Fighter_Anime", (int)Fighter.FITER_ANIMATION.CROUCHKICK);
 
             //Stateの計測時間を初期化する

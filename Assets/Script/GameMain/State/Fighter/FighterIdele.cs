@@ -22,26 +22,49 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner) 
         {
-            //キーから入力された値を取得する
-            Vector2 vel = owner.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
+            // InputSystemManagerを取得する
+            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
 
-            //ジャンプに対応するキーが押された時、ステートを切り替える
-            if (owner.playerInput.currentActionMap["Jump"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.jumpState);
+            // キーから入力された値を取得する
+            Vector2 vel = inputSystemManager.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
 
-            //しゃがみに対応するキーが押された時、ステートを切り替える
-            else if (owner.playerInput.currentActionMap["Crounch"].IsPressed()) owner.stateMachine.ChangeState(owner.crounchState);
-
-            //左右の矢印が押された時、ステートを切り替える
-            else if (!Mathf.Approximately(vel.x, 0.0f)) owner.stateMachine.ChangeState(owner.walkState);
-
+            // ジャンプに対応するキーが押された時
+            if (inputSystemManager.playerInput.currentActionMap["Jump"].WasPressedThisFrame())
+            {
+                // ジャンプステートに切り替える
+                owner.stateMachine.ChangeState(owner.jumpState);
+            }
+            // しゃがみに対応するキーが押された時
+            else if (inputSystemManager.playerInput.currentActionMap["Crounch"].IsPressed())
+            {
+                // しゃがみステートに切り替える
+                owner.stateMachine.ChangeState(owner.crounchState);
+            }
+            // 左右の矢印が押された時
+            else if (!Mathf.Approximately(vel.x, 0.0f))
+            {
+                // 移動ステートに切り替える
+                owner.stateMachine.ChangeState(owner.walkState);
+            }
             //滑って落ちたら、ステートを切り替える
-            else if (!owner.footCollider.isCollision) owner.stateMachine.ChangeState(owner.fallState);
-
+            else if (!owner.footCollider.CheckHitObject("Stage"))
+            {
+                owner.stateMachine.ChangeState(owner.fallState);
+            }
             //パンチに対応するキーが押された時、ステートを切り替える
-            else if (owner.playerInput.currentActionMap["Punch"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.punchState);
-
+            else if (inputSystemManager.playerInput.currentActionMap["Punch"].WasPressedThisFrame())
+            {
+                owner.stateMachine.ChangeState(owner.punchState);
+            }
             //キックに対応するキーが押された時、ステートを切り替える
-            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.kickState);
+            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
+            {
+                owner.stateMachine.ChangeState(owner.kickState);
+            }
+            else if (owner.bodyCollider.CheckHitObject("Door"))
+            {
+                Debug.Log("ドア");
+            }
         }
 
         /// <summary>
@@ -79,6 +102,9 @@ namespace OtobeGame
             //Stateの計測時間を初期化する
             owner.time = 0.0f;
 
+            // OptionSceneへの切り替えを許可する
+            PlayScene playScene = Locater.Get<PlayScene>();
+            playScene.playChange = true;
         }
 
         /// <summary>
@@ -86,6 +112,11 @@ namespace OtobeGame
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
         /// <param name="nextState">次のState</param>
-        public override void OnExit(Fighter owner, StateBase<Fighter> nextState) { }
+        public override void OnExit(Fighter owner, StateBase<Fighter> nextState) 
+        {
+            // OptionSceneへの切り替えを不許可にする
+            PlayScene playScene = Locater.Get<PlayScene>();
+            playScene.playChange = false;
+        }
     }
 }

@@ -29,6 +29,15 @@ namespace OtobeGame
         //ステータスの管理クラス
         private StatusManager m_statusManager = null;
 
+        // キーコンフィグの管理クラス
+        private KeyConfigManager m_keyConfigManager = null;
+
+        // InputSystemの管理クラス
+        private InputSystemManager m_inputSystemManager = null;
+
+        // フェードイン、フェードアウトの管理クラス
+        private FadeManager m_fadeManager = null;
+
         /// <summary>
         /// 初期化処理
         /// </summary>
@@ -42,6 +51,7 @@ namespace OtobeGame
             m_sceneManager.AddScene(TitleScene.SCENE_NAME, () => { return new TitleScene(); });
             m_sceneManager.AddScene(PlayScene.SCENE_NAME, () => { return new PlayScene(); });
             m_sceneManager.AddScene(ResultScene.SCENE_NAME, () => { return new ResultScene(); });
+            m_sceneManager.AddScene(OptionScene.SCENE_NAME, () => { return new OptionScene(); });
 
             //最初のシーンをプレイシーンに設定する
             m_sceneManager.ChangeScene(PlayScene.SCENE_NAME);
@@ -50,11 +60,35 @@ namespace OtobeGame
             m_statusManager = GameObject.Find(StatusManager.OBJECT_NAME).GetComponent<StatusManager>();
             m_statusManager.Init();
 
+            //KeyConfigManagerを探す
+            m_keyConfigManager = GameObject.Find("KeyConfigManager").GetComponent<KeyConfigManager>();
+
+            // InputSystemManagerを探す
+            m_inputSystemManager = GameObject.Find("InputManager").GetComponent<InputSystemManager>();
+            m_inputSystemManager.InitPlayerInput();
+
+            // FadeManagerを探す
+            m_fadeManager = GameObject.Find("FadeManager").GetComponent<FadeManager>();
+            m_fadeManager.InitFadeCanvas(FadeManager.FADESTATE.NONE);
+            m_fadeManager.FadeInFadeOut();
+
+            //サービスロケーターにSceneManagerを登録する
+            Locater.Bind(m_sceneManager);
+
             //サービスロケーターにGameMainを登録する
             Locater.Bind(this);
 
-            //サービスロケーターにstatusManagerを登録する
+            //サービスロケーターにStatusManagerを登録する
             Locater.Bind(m_statusManager);
+
+            //サービスロケーターにKeyConfigManagerを登録する
+            Locater.Bind(m_keyConfigManager);
+
+            // サービスロケーターにInputSystemManagerを登録する
+            Locater.Bind(m_inputSystemManager);
+
+            // サービスロケーターにFadeManagerを登録する
+            Locater.Bind(m_fadeManager);
 
             //CoroutineHandlerのゲームオブジェクトを生成する
             CoroutineHandler handler = CoroutineHandler.instance;

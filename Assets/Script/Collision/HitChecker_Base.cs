@@ -14,11 +14,35 @@ namespace OtobeLib
         [SerializeField]
         private List<string> m_objectsTag = new List<string>();
 
-        //オブジェクトに当たったかどうか検知するフラグ
-        //※衝突したらぶつかるものを検知する
         protected bool m_isCollision = false;
         public bool isCollision { get { return m_isCollision; } }
 
+        // 当たったオブジェクトの配列
+        protected List<GameObject> m_hitObjects = new List<GameObject>();
+
+        public bool CheckHitObject(string tag)
+        {
+            foreach (GameObject hitObject in m_hitObjects)
+            {
+                // 探していたオブジェクトが見つかった場合は、trueを返す
+                if (hitObject.CompareTag(tag)) return true;
+            }
+
+            // 見つからなかった場合は、falseを返す
+            return false;
+        }
+
+        public GameObject FindHitObject(string tag)
+        {
+            foreach (GameObject hitObject in m_hitObjects)
+            {
+                // 探していたオブジェクトが見つかった場合は、そのオブジェクトを返す
+                if (hitObject.CompareTag(tag)) return hitObject;
+            }
+
+            // 見つからなかった場合は、nullを返す
+            return null;
+        }
         /// <summary>
         /// オブジェクトのタグ一覧から当たり判定が設定されているものかどうか検索する
         /// </summary>

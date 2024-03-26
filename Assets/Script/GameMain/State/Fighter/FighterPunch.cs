@@ -22,12 +22,30 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            //パンチのアニメーションが終了したら、ステートを切り替える
-            if (owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= m_finishAnime)
-                owner.stateMachine.ChangeState(owner.ideleState);
+            // InputSystemManagerを取得する
+            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
 
+            // パンチのアニメーションが終了
+            if (owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= m_finishAnime)
+            {
+                // ステートを切り替える
+                owner.stateMachine.ChangeState(owner.ideleState);
+            }
+            // パンチ中に再度パンチするとき
+            else if (inputSystemManager.playerInput.currentActionMap["Punch"].WasPressedThisFrame())
+            {
+                owner.animator.Play("Fighter_Punch", 0, 0.0f);
+            }
             //パンチ中に落下したら、ステートを切り替える
-            else if (!owner.footCollider.isCollision) owner.stateMachine.ChangeState(owner.fallState);
+            else if (!owner.footCollider.CheckHitObject("Stage")) 
+            {
+                owner.stateMachine.ChangeState(owner.fallState);
+            } 
+            // 爆発物に当たったとき
+            else if (owner.armCollider.CheckHitObject(ExBlockManager.EXPROSION_TAG))
+            {
+                owner.ExBlockBrakeStart(owner.armCollider);
+            }
         }
 
         /// <summary>

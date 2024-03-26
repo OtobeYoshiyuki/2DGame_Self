@@ -59,7 +59,7 @@ namespace OtobeGame
         private float m_time = 0.0f;
         public float time { get { return m_time; } set { m_time = value; } }
 
-        // Starの衝突をチェックするフラグ
+        // キャラの衝突をチェックするフラグ
         private bool m_damageCheck = false;
 
         // キャラがやられたかをチェックするフラグ
@@ -76,11 +76,6 @@ namespace OtobeGame
         //アニメーター
         private Animator m_animator = null;
         public Animator animator { get { return m_animator; } }
-
-        //playerInput
-        private PlayerInput m_playerInput = null;
-        public PlayerInput playerInput { get { return m_playerInput; } }
-
 
         /// <summary>
         /// キャラクターの初期化
@@ -104,9 +99,6 @@ namespace OtobeGame
 
             //RigidBody2Dを取得する
             m_rigidBody2D = gameObject.GetComponent<Rigidbody2D>();
-
-            //playerInputを取得する
-            m_playerInput = gameObject.GetComponent<PlayerInput>();
         }
 
         /// <summary>

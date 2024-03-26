@@ -22,48 +22,59 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            //キーから入力された値を取得する
-            Vector2 direct = owner.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
+            // InputSystemManagerを取得する
+            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
 
-            //キーの入力が1or-1の時
+            // キーから入力された値を取得する
+            Vector2 direct = inputSystemManager.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
+
+            // キーの入力が1or-1の時
             if (!Mathf.Approximately(direct.x, 0.0f))
             {
-                //ダッシュに割り当てられたキーが押されている間、アニメーションの速度を変更する
-                if (owner.playerInput.currentActionMap["Dash"].IsPressed()) 
+                // ダッシュに割り当てられたキーが押されている間
+                if (inputSystemManager.playerInput.currentActionMap["Dash"].IsPressed())
+                {
+                    // ダッシュアニメーションの速度を変更する
                     owner.animator.SetFloat("moveSpeed", owner.walkState.runMotion);
-                //キーが離されたら、アニメーションの速度をもとに戻す
-                else owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
+                }
+                // ダッシュキーが離されたら
+                else
+                {
+                    // ダッシュアニメーションの速度を元に戻す
+                    owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
+                }
 
-                //現在の歩きのアニメーションのモーションスピードを取得する
+                // 現在の歩きのアニメーションのモーションスピードを取得する
                 float motionSpeed = owner.animator.GetFloat("moveSpeed");
 
-                //キーの入力に合わせて、オブジェクトを反転させる
+                // キーの入力に合わせて、オブジェクトを反転させる
                 owner.transform.localScale = new Vector3(direct.x * owner.scale.x, owner.scale.y, owner.scale.z);
 
-                //Fighterを移動させる
+                // Fighterを移動させる
                 owner.rigidBody2D.velocity = new Vector2(owner.moveSpeed.x * direct.x * motionSpeed, owner.rigidBody2D.velocity.y);
 
-                //ステートの時間を初期化する
+                // ステートの時間を初期化する
                 owner.time = 0.0f;
             }
 
-            //着地した
-            if (owner.footCollider.isCollision)
+            // 着地した
+            if (owner.footCollider.CheckHitObject("Stage"))
             {
-                //ステートを切り替える
+                // ステートを切り替える
                 owner.stateMachine.ChangeState(owner.ideleState);
 
-                //空中蹴りのフラグを初期化する
+                // 空中蹴りのフラグを初期化する
                 owner.flyingKickState.isAtack = false;
             }
 
-            //空中でキックに対応するキーが押されていて、まだ攻撃していないとき
-            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame() && !owner.flyingKickState.isAtack)
+            // 空中でキックに対応するキーが押されていて、まだ攻撃していないとき
+            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame() &&
+                !owner.flyingKickState.isAtack)
             {
-                //ステートを切り替える
+                // ステートを切り替える
                 owner.stateMachine.ChangeState(owner.flyingKickState);
 
-                //攻撃フラグを立てる
+                // 攻撃フラグを立てる
                 owner.flyingKickState.isAtack = true;
             }
         }
@@ -91,10 +102,10 @@ namespace OtobeGame
         {
             Debug.Log("落下ステート");
 
-            //Fighterのアニメーションを呼吸に切り替える
+            // Fighterのアニメーションを落下に切り替える
             owner.animator.SetInteger("Fighter_Anime", (int)Fighter.FITER_ANIMATION.FALL);
 
-            //Stateの計測時間を初期化する
+            // Stateの計測時間を初期化する
             owner.time = 0.0f;
         }
 

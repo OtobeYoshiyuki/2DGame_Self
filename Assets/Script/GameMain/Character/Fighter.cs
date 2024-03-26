@@ -34,6 +34,7 @@ public class Fighter : Hero
         ARM,            //腕の攻撃判定
         FOOT,           //着地用の判定
         KICK,           //足の攻撃判定
+        SPRITE          //画像
     }
 
     //子供（足）の当たり判定を検出するクラス
@@ -43,6 +44,18 @@ public class Fighter : Hero
     //子供（足の攻撃）の当たり判定を検出するクラス
     HitChecker_Collider m_kickCollider = null;
     public HitChecker_Collider kickCollider { get { return m_kickCollider; } }
+
+    // 子供(腕の攻撃)の当たり判定を検出するクラス
+    HitChecker_Collider m_armCollider = null;
+    public HitChecker_Collider armCollider { get { return m_armCollider; } }
+
+    // 子供(体)の当たり判定を検出するクラス
+    HitChecker_Collider m_bodyCollider = null;
+    public HitChecker_Collider bodyCollider { get { return m_bodyCollider; } }
+
+    // ダッシュエフェクトの制御クラス
+    DashAnimeController m_dashAnimeCs = null;
+    public DashAnimeController dashAnimeCs { get { return m_dashAnimeCs; } }
 
     //状態遷移を管理するステートマシーン
     private StateMachine<Fighter> m_stateMachine = null;
@@ -109,9 +122,14 @@ public class Fighter : Hero
         m_stateMachine = new StateMachine<Fighter>(this, m_ideleState);
 
         //子供にアタッチされている当たり判定用のスクリプトを取得する
+        m_bodyCollider = transform.GetChild((int)CHILD_OBJECT.BODY).gameObject.GetComponent<HitChecker_Collider>();
+        m_armCollider = transform.GetChild((int)CHILD_OBJECT.ARM).gameObject.GetComponent<HitChecker_Collider>();
         m_footCollider = transform.GetChild((int)CHILD_OBJECT.FOOT).gameObject.GetComponent<HitChecker_Collider>();
         m_kickCollider = transform.GetChild((int)CHILD_OBJECT.KICK).gameObject.GetComponent<HitChecker_Collider>();
 
+        // ダッシュアニメーションの制御クラスを取得する
+        m_dashAnimeCs = m_footCollider.transform.GetChild(0).gameObject.GetComponent<DashAnimeController>();
+        m_dashAnimeCs.StopAnimation();
     }
 
     /// <summary>
