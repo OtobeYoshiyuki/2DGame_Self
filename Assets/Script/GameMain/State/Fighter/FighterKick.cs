@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using OtobeGame;
 
 namespace OtobeLib
 {
@@ -26,7 +27,14 @@ namespace OtobeLib
                 owner.stateMachine.ChangeState(owner.ideleState);
 
             //キック中に落下したら、ステートを切り替える
-            else if (!owner.footCollider.isCollision) owner.stateMachine.ChangeState(owner.fallState);
+            else if (!owner.footCollider.CheckHitObject("Stage"))
+            {
+                owner.stateMachine.ChangeState(owner.fallState);
+            }
+            else if (owner.kickCollider.CheckHitObject(ExBlockManager.EXPROSION_TAG))
+            {
+                owner.ExBlockBrakeStart(owner.kickCollider);
+            }
         }
 
         /// <summary>

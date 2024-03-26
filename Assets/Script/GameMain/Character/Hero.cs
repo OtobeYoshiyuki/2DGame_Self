@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using OtobeGame;
+using OtobeLib;
 using UnityEngine.InputSystem;
 
 namespace OtobeGame
@@ -25,10 +25,19 @@ namespace OtobeGame
         /// </summary>
         public override void UpdateCharacter()
         {
+            // InputSystemManagerを取得する
+            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
+
             //ゲームパッドが接続されていないときは、キーボード操作に切り替える
-            if (Gamepad.current == null) playerInput.SwitchCurrentControlScheme("Keybord", Keyboard.current);
+            if (Gamepad.current == null)
+            {
+                inputSystemManager.playerInput.SwitchCurrentControlScheme("Keybord", Keyboard.current);
+            }
             //ゲームパッドが接続されているときは、ゲームパッド操作に切り替える
-            else playerInput.SwitchCurrentControlScheme("Gamepad", Gamepad.current);
+            else
+            {
+                inputSystemManager.playerInput.SwitchCurrentControlScheme("Gamepad", Gamepad.current);
+            }
 
             //操作キャラの更新処理
             base.UpdateCharacter();
@@ -63,6 +72,15 @@ namespace OtobeGame
             base.FinalCharacter();
         }
 
+        public void ExBlockBrakeStart(HitChecker_Base hitChecker)
+        {
+            ExBlockManager exBlockManager = hitChecker.FindHitObject(ExBlockManager.EXPROSION_TAG)
+                .transform.parent.gameObject.GetComponent<ExBlockManager>();
+            CoroutineHandler.instance.StartCoroutine(exBlockManager.ExplosionAllBlocks());
+            ExBlockController blockController = hitChecker.FindHitObject(ExBlockManager.EXPROSION_TAG)
+                .GetComponent<ExBlockController>();
+            blockController.FinishAnimation();
+        }
     }
 
 }
