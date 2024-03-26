@@ -29,58 +29,80 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            //Moveに割り当てられているキーの値を取得する
-            Vector2 direct = owner.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
+            // InputSystemManagerを取得する
+            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
 
-            //ジャンプに対応するキーが押された時
-            if (owner.playerInput.currentActionMap["Jump"].WasPressedThisFrame())
-                //ジャンプのステートに切り替える
+            // Moveに割り当てられているキーの値を取得する
+            Vector2 direct = inputSystemManager.playerInput.actions["Move"].ReadValue<Vector2>();
+
+            // ジャンプに対応するキーが押された時
+            if (inputSystemManager.playerInput.currentActionMap["Jump"].WasPressedThisFrame())
+            {
+                // ジャンプのステートに切り替える
                 owner.stateMachine.ChangeState(owner.jumpState);
-
-            //歩いているときに落下したとき
-            else if (!owner.footCollider.isCollision)
-                //落下のステートに切り替える
+            }
+            // 歩いているときに落下したとき
+            else if (!owner.footCollider.CheckHitObject("Stage"))
+            {
+                // 落下のステートに切り替える
                 owner.stateMachine.ChangeState(owner.fallState);
-
-            //しゃがみに対応するキーが押された時
-            else if (owner.playerInput.currentActionMap["Crounch"].IsPressed())
-                //しゃがみのステートに切り替える
+            }
+            // しゃがみに対応するキーが押された時
+            else if (inputSystemManager.playerInput.currentActionMap["Crounch"].IsPressed())
+            {
+                // しゃがみのステートに切り替える
                 owner.stateMachine.ChangeState(owner.crounchState);
-
-            //パンチに対応するキーが押された時、ステートを切り替える
-            else if (owner.playerInput.currentActionMap["Punch"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.punchState);
-
-            //キックに対応するキーが押された時、ステートを切り替える
-            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.kickState);
-
-            //キーの入力が1or - 1の時
+            }
+            // パンチに対応するキーが押された時、ステートを切り替える
+            else if (inputSystemManager.playerInput.currentActionMap["Punch"].WasPressedThisFrame())
+            {
+                // パンチのステートに切り替える
+                owner.stateMachine.ChangeState(owner.punchState);
+            }
+            // キックに対応するキーが押された時、ステートを切り替える
+            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
+            {
+                // キックのステートに切り替える
+                owner.stateMachine.ChangeState(owner.kickState);
+            }
+            // キーの入力が1or - 1の時
             else if (!Mathf.Approximately(direct.x, 0.0f))
             {
-                //ダッシュに割り当てられたキーが押されている間、アニメーションの速度を変更する
-                if (owner.playerInput.currentActionMap["Dash"].IsPressed()) owner.animator.SetFloat("moveSpeed", m_runMotion);
-                //キーが離されたら、アニメーションの速度をもとに戻す
-                else owner.animator.SetFloat("moveSpeed", m_defaltMotion);
+                // ダッシュに割り当てられたキーが押されている間
+                if (inputSystemManager.playerInput.currentActionMap["Dash"].IsPressed())
+                {
+                    // 移動アニメーションの速度を変更する
+                    owner.animator.SetFloat("moveSpeed", m_runMotion);
 
-                //現在の歩きのアニメーションのモーションスピードを取得する
+                    owner.dashAnimeCs.StartAnimation();
+                }
+                // ダッシュに割り当てられたキーが離されたら
+                else
+                {
+                    // 移動アニメーションの速度をもとに戻す
+                    owner.animator.SetFloat("moveSpeed", m_defaltMotion);
+                }
+
+                // 現在の歩きのアニメーションのモーションスピードを取得する
                 float motionSpeed = owner.animator.GetFloat("moveSpeed");
 
-                //キーの入力に合わせて、オブジェクトを反転させる
+                // キーの入力に合わせて、オブジェクトを反転させる
                 owner.transform.localScale = new Vector3(direct.x * owner.scale.x, owner.scale.y, owner.scale.z);
 
-                //Fighterを移動させる
+                // Fighterを移動させる
                 owner.rigidBody2D.velocity = new Vector2(owner.moveSpeed.x * direct.x * motionSpeed, owner.rigidBody2D.velocity.y);
 
-                //ステートの時間を初期化する
+                // ステートの時間を初期化する
                 owner.time = 0.0f;
             }
-            //キーの入力がないとき
+            // キーの入力がないとき
             else
             {
-                //ステートの時間を更新する
+                // ステートの時間を更新する
                 owner.time += Time.deltaTime;
 
-                //時間が一定値以上更新された場合は呼吸のステートに切り替える
-                //※すぐに方向転換した場合は、ステートを移行しない
+                // 時間が一定値以上更新された場合は呼吸のステートに切り替える
+                // ※すぐに方向転換した場合は、ステートを移行しない
                 if (owner.time >= owner.ideleState.changeTime) owner.stateMachine.ChangeState(owner.ideleState);
             }
         }
@@ -90,7 +112,7 @@ namespace OtobeGame
         /// ※物理演算を伴う更新
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
-        public override void OnFixedExecute(Fighter owner) 
+        public override void OnFixedExecute(Fighter owner)
         {
         }
 
@@ -106,14 +128,14 @@ namespace OtobeGame
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
         /// <param name="preState">前回のステート</param>
-        public override void OnEnter(Fighter owner, StateBase<Fighter> preState) 
+        public override void OnEnter(Fighter owner, StateBase<Fighter> preState)
         {
             Debug.Log("ウォークステート");
 
-            //Fighterのアニメーションを歩行に切り替える
+            // Fighterのアニメーションを歩行に切り替える
             owner.animator.SetInteger("Fighter_Anime", (int)Fighter.FITER_ANIMATION.WALK);
 
-            //Stateの計測時間を初期化する
+            // Stateの計測時間を初期化する
             owner.time = 0.0f;
         }
 
@@ -122,7 +144,10 @@ namespace OtobeGame
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
         /// <param name="nextState">次のState</param>
-        public override void OnExit(Fighter owner, StateBase<Fighter> nextState) { }
+        public override void OnExit(Fighter owner, StateBase<Fighter> nextState)
+        {
+            owner.dashAnimeCs.StopAnimation();
+        }
     }
 
 }

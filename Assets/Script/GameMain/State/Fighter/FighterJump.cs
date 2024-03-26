@@ -21,14 +21,17 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
+            // InputSystemManagerを取得する
+            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
+
             //キーから入力された値を取得する
-            Vector2 direct = owner.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
+            Vector2 direct = inputSystemManager.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
 
             //キーの入力が1or-1の時
             if (!Mathf.Approximately(direct.x, 0.0f))
             {
                 //ダッシュに割り当てられたキーが押されている間、アニメーションの速度を変更する
-                if (owner.playerInput.currentActionMap["Dash"].IsPressed()) 
+                if (inputSystemManager.playerInput.currentActionMap["Dash"].IsPressed()) 
                     owner.animator.SetFloat("moveSpeed", owner.walkState.runMotion);
                 //キーが離されたら、アニメーションの速度をもとに戻す
                 else owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
@@ -51,7 +54,7 @@ namespace OtobeGame
                 owner.stateMachine.ChangeState(owner.fallState);
 
             //空中でキックに対応するキーが押された時
-            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
+            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
             {
                 //ステートを切り替える
                 owner.stateMachine.ChangeState(owner.flyingKickState);
@@ -93,7 +96,8 @@ namespace OtobeGame
             owner.time = 0.0f;
 
             //ジャンプさせる
-            owner.rigidBody2D.AddForce(Vector2.up * m_jumpPower, ForceMode2D.Force);
+            owner.rigidBody2D.velocity = Vector2.zero;
+            owner.rigidBody2D.AddForce(Vector2.up * m_jumpPower, ForceMode2D.Impulse);
         }
 
         /// <summary>

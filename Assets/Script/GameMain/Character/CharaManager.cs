@@ -33,14 +33,14 @@ namespace OtobeGame
         public void InitCharaManager()
         {
             //操作キャラを生成する
-            PlayerInput playerInput = PlayerInputManager.instance.JoinPlayer(0, -1, "Gamepad", Gamepad.current);
-            GameObject gameObject = playerInput.gameObject;
-            m_heroCharacter = gameObject.GetComponent<Fighter>();
+            GameObject gameObject = Resources.Load("Fighter") as GameObject;
+            GameObject fighter = Instantiate(gameObject);
+            m_heroCharacter = fighter.GetComponent<Fighter>();
             m_heroCharacter.InitCharacter();
 
             //InstantiateされたオブジェクトはManagerSceneに作られるため、PlaySceneに移動させる
             UnityEngine.SceneManagement.Scene playScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(PlayScene.SCENE_NAME);
-            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(gameObject, playScene);
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(fighter, playScene);
 
             //敵キャラのコンテナを生成する
             m_enemyCharacters = new List<Enemy>();

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using OtobeGame;
 using UnityEngine.InputSystem;
 
 namespace OtobeLib
@@ -30,9 +30,17 @@ namespace OtobeLib
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
+            // 爆発物に当たったとき
+            if (owner.kickCollider.CheckHitObject(ExBlockManager.EXPROSION_TAG))
+            {
+                owner.ExBlockBrakeStart(owner.kickCollider);
+            }
             //敵に攻撃が当たるか時間が経過したときにステートを切り替える
-            if (owner.kickCollider.isCollision || owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= m_atackTime)
+            else if (owner.kickCollider.isCollision || owner.footCollider.CheckHitObject("Stage") ||
+                owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= m_atackTime)
+            {
                 owner.stateMachine.ChangeState(owner.fallState);
+            }
         }
 
         /// <summary>

@@ -17,14 +17,24 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            //しゃがみに対応するキーが離された時は、ステートを切り替える
-            if (!owner.playerInput.currentActionMap["Crounch"].IsPressed()) owner.stateMachine.ChangeState(owner.ideleState);
+            // InputSystemManagerを取得する
+            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
 
-            //キックに対応するキーが押された時、ステートを切り替える
-            else if (owner.playerInput.currentActionMap["Kick"].WasPressedThisFrame()) owner.stateMachine.ChangeState(owner.crouchKickState);
-
-            //滑って落ちたら、ステートを切り替える
-            else if (!owner.footCollider.isCollision) owner.stateMachine.ChangeState(owner.fallState);
+            // しゃがみに対応するキーが離された時は、ステートを切り替える
+            if (!inputSystemManager.playerInput.currentActionMap["Crounch"].IsPressed())
+            {
+                owner.stateMachine.ChangeState(owner.ideleState);
+            }
+            // キックに対応するキーが押された時、ステートを切り替える
+            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
+            {
+                owner.stateMachine.ChangeState(owner.crouchKickState);
+            }
+            // 滑って落ちたら、ステートを切り替える
+            else if (!owner.footCollider.CheckHitObject("Stage"))
+            { 
+                owner.stateMachine.ChangeState(owner.fallState); 
+            }
         }
 
         /// <summary>

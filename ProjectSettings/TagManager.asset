@@ -7,6 +7,9 @@ TagManager:
   - Stage
   - Fighter
   - Wall
+  - Explosion
+  - Block
+  - Door
   layers:
   - Default
   - TransparentFX
@@ -17,7 +20,7 @@ TagManager:
   - Map
   - Enemy
   - Hero
-  - 
+  - Camera
   - 
   - 
   - 

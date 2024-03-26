@@ -13,20 +13,26 @@ namespace OtobeLib
     /// </summary>
     public class SceneManager
     {
-        //シーンのリスト
+        // シーンのリスト
         private LinkedList<ISceneBase> m_sceneList = null;
 
-        //シーンの生成を行うファクトリー
+        // シーンの生成を行うファクトリー
         private Dictionary<string, Func<ISceneBase>> m_sceneFactory = null;
 
-        //シーンの情報
+        // シーンの情報
         private LinkedList<string> m_sceneInfo = null;
 
-        //シーンの消去する情報
+        // シーンの消去する情報
         private LinkedList<string> m_unloadInfo = null;
 
-        //シーンを削除する数
+        // シーンを削除する数
         private int m_popCount = GameMain.NULL;
+
+        // シーンの生成中の判定
+        private bool m_sceneCreate = false;
+
+        // シーンの削除中の判定
+        private bool m_sceneDelete = false;
 
         /// <summary>
         /// SceneManagerの初期化処理
@@ -57,13 +63,7 @@ namespace OtobeLib
             //シーンの削除および終了処理
             for (int i = GameMain.NULL; i < m_popCount; i++)
             {
-                m_sceneList.Last.Value.Final();
-                m_sceneList.RemoveLast();
-                //稼働しているシーンを消去する
-                UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(m_unloadInfo.Last.Value);
-                //アセットも消す
-                Resources.UnloadUnusedAssets();
-                m_unloadInfo.RemoveLast();
+                CoroutineHandler.instance.StartCoroutine(SceneDelete());
             }
 
             //削除カウントを初期化する
@@ -72,22 +72,20 @@ namespace OtobeLib
             //シーンの生成を行う
             foreach (string info in m_sceneInfo)
             {
-                //シーンをロードする
-                UnityEngine.SceneManagement.SceneManager.LoadScene(info, LoadSceneMode.Additive);   
-                //次のシーンを生成する
-                m_sceneList.AddLast(m_sceneFactory[info]());
-                //生成したシーンの初期化を行う
-                m_sceneList.Last.Value.Init();
+                CoroutineHandler.instance.StartCoroutine(SceneCreate(info));
             }
 
             //シーンの情報を削除する
             m_sceneInfo.Clear();
 
-            //シーンが存在するとき
-            if (m_sceneList.Count > 0)
+            if (!m_sceneCreate && !m_sceneDelete)
             {
-                //一番後ろのシーンを更新する
-                m_sceneList.Last.Value.Update();
+                //シーンが存在するとき
+                if (m_sceneList.Count > 0)
+                {
+                    //一番後ろのシーンを更新する
+                    m_sceneList.Last.Value.Update();
+                }
             }
         }
 
@@ -171,28 +169,77 @@ namespace OtobeLib
             m_popCount = Inspection;
         }
 
-        public IEnumerator Start(string sceneName)
+        public IEnumerator SceneCreate(string sceneName)
         {
+            // Sceneの生成中の判定
+            m_sceneCreate = true;
+
             // 非同期でロードを行う
-            var asyncLoad = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName,LoadSceneMode.Additive);
+            var asyncLoad = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
 
-            // ロードが完了していても，シーンのアクティブ化は許可しない
-            asyncLoad.allowSceneActivation = false;
-
-            // フェードアウト等の何かしらの処理
-            //yield return new WaitForSeconds(10);
-
-            // ロードが完了したときにシーンのアクティブ化を許可する
+            // ロードが完了していても，シーンのアクティブ化を許可する
             asyncLoad.allowSceneActivation = true;
-
-            //次のシーンを生成する
-            m_sceneList.AddLast(m_sceneFactory[sceneName]());
-            //生成したシーンの初期化を行う
-            m_sceneList.Last.Value.Init();
 
             // ロードが完了するまで待つ
             yield return asyncLoad;
+
+            // 次のシーンを生成する
+            m_sceneList.AddLast(m_sceneFactory[sceneName]());
+
+            // 生成したシーンの初期化を行う
+            m_sceneList.Last.Value.Init();
+
+            // Sceneの生成終了
+            m_sceneCreate = false;
         }
+
+        public IEnumerator SceneDelete()
+        {
+            // 削除中のフラグをONにする
+            m_sceneDelete = true;
+
+            // 稼働しているシーンのFinalizeを呼ぶ
+            m_sceneList.Last.Value.Final();
+
+            // Sceneをリストから削除する
+            m_sceneList.RemoveLast();
+
+            //稼働しているシーンを消去する
+            AsyncOperation scene = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(m_unloadInfo.Last.Value);
+            m_unloadInfo.RemoveLast();
+
+            // 削除が完了するまで待つ
+            yield return scene;
+
+            //アセットも消す
+            AsyncOperation resource = Resources.UnloadUnusedAssets();
+
+            yield return resource;
+
+            // 削除完了
+            m_sceneDelete = false;
+        }
+
+        /// <summary>
+        /// シーンのロード完了後に実装される関数
+        /// </summary>
+        /// <param name="thisScene">現在のシーン</param>
+        /// <param name="sceneMode">ロードしたシーンのモード</param>
+        void LoadSceneChanged(Scene thisScene, LoadSceneMode sceneMode)
+        {
+            // 新しいSceneを生成する
+            ISceneBase newScene = m_sceneFactory[thisScene.name]();
+
+            // 次のシーンを生成する
+            m_sceneList.AddLast(newScene);
+
+            // 生成したシーンの初期化を行う
+            m_sceneList.Last.Value.Init();
+
+            // 登録したイベントを削除する
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= LoadSceneChanged;
+        }
+
     }
 }
 
