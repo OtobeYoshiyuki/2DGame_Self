@@ -6,146 +6,149 @@ using OtobeLib;
 namespace OtobeGame
 {
     /// <summary>
-    /// ”š”­‚·‚éƒuƒƒbƒN‚ÌŠÇ—ƒNƒ‰ƒX
+    /// çˆ†ç™ºã™ã‚‹ãƒ–ãƒ­ãƒƒã‚¯ã®ç®¡ç†ã‚¯ãƒ©ã‚¹
     /// </summary>
     public class ExBlockManager : MonoBehaviour
     {
+        // æ–¹å‘
         enum DIRECT : int
         {
-            NONE = 0,
-            UP = 1,
-            DOWN = -1,
-            LEFT = -1,
-            RIGHT = 1
+            NONE = 0,       // ç‰¹ã«ãªã—
+            UP = 1,         // ä¸Š
+            DOWN = -1,      // ä¸‹
+            LEFT = -1,      // å·¦
+            RIGHT = 1       // å³
         }
 
-        // ”š”­ƒuƒƒbƒN‚Ìƒ^ƒO
-        public const string EXPROSION_TAG = "Explosion";
+        // GameObjectã®æ¤œç´¢ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰
+        public const string EXBLOCK_SEARCH = "ExBlocks";
 
-        // ’ÊíƒuƒƒbƒN‚Ìƒ^ƒO
-        public const string BLOCK_TAG = "Block";
-
-        // ”š”­‚ÉÅ‰‚É‰ó‚³‚ê‚éƒuƒƒbƒN‚ÌƒCƒ“ƒfƒbƒNƒX
+        // çˆ†ç™ºæ™‚ã«æœ€åˆã«å£Šã•ã‚Œã‚‹ãƒ–ãƒ­ãƒƒã‚¯ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
         private Vector2Int BREAK_BLOCK_INDEX = new Vector2Int(0, 0);
 
-        // ƒuƒƒbƒN‚Ìc‚Ì’·‚³
+        // ãƒ–ãƒ­ãƒƒã‚¯ã®ç¸¦ã®é•·ã•
         [SerializeField]
         private int m_colmunSize = 0;
 
-        // ƒuƒƒbƒN‚Ì‰¡‚Ì’·‚³
+        // ãƒ–ãƒ­ãƒƒã‚¯ã®æ¨ªã®é•·ã•
         [SerializeField]
         private int m_rowSize = 0;
 
-        // ”š”­ƒuƒƒbƒN
-        private GameObject m_exBlock = null;
-        public GameObject exBlock { get { return m_exBlock; } }
-
-        // ’ÊíƒuƒƒbƒN(”š”­ƒAƒjƒ[ƒVƒ‡ƒ“•t‚«)
-        private List<GameObject> m_normalBlocks = new List<GameObject>();
-
-        // ƒuƒƒbƒN‚Ì”z—ñ
-        private List<List<GameObject>> m_blocks = new List<List<GameObject>>();
+        // ãƒ–ãƒ­ãƒƒã‚¯ã®é…åˆ—
+        private List<List<Block>> m_blocks = new List<List<Block>>();
 
         public void InitBlocks()
         {
-            // q‹ŸƒIƒuƒWƒFƒNƒgQÆ—pƒCƒ“ƒfƒbƒNƒX
+            // å­ä¾›ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆå‚ç…§ç”¨ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
             int index = 0;
 
             for (int i = 0; i < m_colmunSize;i++)
             {
-                // 1—ñ•ª‚ÌƒuƒƒbƒN
-                List<GameObject> blocks = new List<GameObject>();
+                // 1åˆ—åˆ†ã®ãƒ–ãƒ­ãƒƒã‚¯
+                List<Block> blocks = new List<Block>();
 
                 for (int j = 0; j < m_rowSize;j++)
                 {
-                    // q‹ŸƒIƒuƒWƒFƒNƒg‚ğæ“¾‚·‚é
-                    GameObject child = transform.GetChild(index).gameObject;
+                    // å­ä¾›ã®GameObjectã‚’å–å¾—ã™ã‚‹
+                    GameObject gameObject = transform.GetChild(index).gameObject;
 
-                    // ”š”­ƒuƒƒbƒN‚Ìê‡
-                    if (child.gameObject.tag.Equals(EXPROSION_TAG))
-                    {
-                        m_exBlock = child;
-                    }
-                    // ’ÊíƒuƒƒbƒN‚Ìê‡
-                    else if (child.gameObject.tag.Equals(BLOCK_TAG))
-                    {
-                        m_normalBlocks.Add(child);
-                    }
+                    // éšœå®³ç‰©ã‚’å–å¾—ã—ã€åˆæœŸåŒ–ã™ã‚‹
+                    IObstacle block = gameObject.GetComponent<IObstacle>();
+                    block.InitObstacle();
 
-                    // ŠeƒuƒƒbƒN‚ğİ’è‚·‚é
-                    ExBlockController controller = child.GetComponent<ExBlockController>();
-                    blocks.Add(child);
+                    // å„ãƒ–ãƒ­ãƒƒã‚¯ã‚’è¨­å®šã™ã‚‹
+                    blocks.Add(block as Block);
 
-                    // QÆ—pƒCƒ“ƒfƒbƒNƒX‚ğXV‚·‚é
+                    // å‚ç…§ç”¨ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’æ›´æ–°ã™ã‚‹
                     index++;
                 }
-                // 1—ñ•ª‚ÌƒuƒƒbƒN‚ğ“ñŸŒ³”z—ñ‚Éƒ}[ƒW‚·‚é
+                // 1åˆ—åˆ†ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’äºŒæ¬¡å…ƒé…åˆ—ã«ãƒãƒ¼ã‚¸ã™ã‚‹
                 m_blocks.Add(blocks);
             }
         }
 
         public IEnumerator ExplosionAllBlocks()
         {
-            // ƒuƒƒbƒN‚Ì¶’[‚Æã’[‚©‚çÎ‚ß’¼ü‚ÌƒuƒƒbƒN‚ğZo‚·‚é
+            // ãƒ–ãƒ­ãƒƒã‚¯ã®å·¦ç«¯ã¨ä¸Šç«¯ã‹ã‚‰æ–œã‚ç›´ç·šã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’ç®—å‡ºã™ã‚‹
             int loopNum = (m_colmunSize - 1) + (m_rowSize - 1);
 
-            // Zo—p‚ÌƒCƒ“ƒfƒbƒNƒX
+            // ç®—å‡ºç”¨ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
             Vector2Int index = BREAK_BLOCK_INDEX;
 
             for (int i = 0; i < loopNum;i++)
             {
-                // “Vˆä‚Ì‚Æ‚«‚Í(1,0)A“Vˆä‚Ü‚Å“’B‚µ‚Ä‚¢‚È‚¢‚Æ‚«‚Í(0,1)‚ğ•Ô‚·
+                // å¤©äº•ã®ã¨ãã¯(1,0)ã€å¤©äº•ã¾ã§åˆ°é”ã—ã¦ã„ãªã„ã¨ãã¯(0,1)ã‚’è¿”ã™
                 index += BlockCeilingIndex(index);
-                List<GameObject> breakBlocks = ObliqueLine(index);
-                foreach(GameObject block in breakBlocks)
+
+                // æ–œã‚ç›´ç·šä¸Šã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–å¾—ã™ã‚‹
+                List<Block> breakBlocks = ObliqueLine(index);
+                foreach(IObstacle block in breakBlocks)
                 {
-                    Animator blockAnimator = block.GetComponent<Animator>();
-                    blockAnimator.SetInteger("BlockState", 1);
+                    block.DestoryAnimeStart();
                 }
                 yield return new WaitForSeconds(0.2f);
             }
         }
 
-        private List<GameObject> ObliqueLine(Vector2Int index)
+        public void CharacterBreakeBlock(ICharacter character, List<IHitChecker> hitCheckers)
         {
-            // Î‚ß’¼ü‚É‘¶İ‚·‚éƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚ÌƒŠƒXƒg
-            List<GameObject> obliqueLineObjects = new List<GameObject>();
-            obliqueLineObjects.Add(m_blocks[index.y][index.x]);
+            foreach (IHitChecker hit in hitCheckers)
+            {
+                // å…¥åŠ›åˆ¶å¾¡ãŒãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å ´åˆ
+                if (character.control is UserController)
+                {
+                    // æ“ä½œå¯èƒ½ãªã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ãŒçˆ†ç™ºãƒ–ãƒ­ãƒƒã‚¯ã‚’å£Šã—ãŸã¨ã
+                    if (hit.CheckHitObject(ExplosionBlock.EXPROSION_TAG))
+                    {
+                        // ç ´å£Šå¯¾è±¡ã®éšœå®³ç‰©ã‚’å–å¾—ã™ã‚‹
+                        Obstacle obstacle = hit.FindHitObject(ExplosionBlock.EXPROSION_TAG).GetComponent<ExplosionBlock>();
 
-            // ‰E’[‚Ü‚Å“’B‚µ‚Ä‚¢‚È‚¢‚©‚Â’ê‚Ü‚Å“’B‚µ‚Ä‚¢‚È‚¢‚Æ‚«
+                        // ãƒ–ãƒ­ãƒƒã‚¯ã‚’é€£é–çš„ã«ç ´å£Šã™ã‚‹
+                        character.OnDestoryObstacle(obstacle);
+                    }
+                }
+            }
+        }
+
+        private List<Block> ObliqueLine(Vector2Int index)
+        {
+            // æ–œã‚ç›´ç·šã«å­˜åœ¨ã™ã‚‹ã‚²ãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒªã‚¹ãƒˆ
+            List<Block> obliqueLineObjects = new List<Block>();
+
+            // å³ç«¯ã¾ã§åˆ°é”ã—ã¦ã„ãªã„ã‹ã¤åº•ã¾ã§åˆ°é”ã—ã¦ã„ãªã„ã¨ã
             while (!IsBlockRightEdge(index) && !IsBlockFloor(index))
             {
-                index += new Vector2Int((int)DIRECT.RIGHT, (int)DIRECT.DOWN);
                 obliqueLineObjects.Add(m_blocks[index.y][index.x]);
+                index += new Vector2Int((int)DIRECT.RIGHT, (int)DIRECT.DOWN);
             }
 
-            return obliqueLineObjects;
+            return obliqueLineObjects; 
         }
 
         private Vector2Int BlockCeilingIndex(Vector2Int index)
         {
-            // ƒCƒ“ƒfƒbƒNƒX‚ª“Vˆä‚Ì‚Æ‚«
+            // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãŒå¤©äº•ã®ã¨ã
             if (index.y >= m_colmunSize - 1)
             {
-                // ‰E‚ÉˆÚ“®‚³‚¹‚é
+                // å³ã«ç§»å‹•ã•ã›ã‚‹
                 return new Vector2Int((int)DIRECT.RIGHT, (int)DIRECT.NONE);
             }
-            // ƒCƒ“ƒfƒbƒNƒX‚ª“Vˆä‚Ü‚Å“’B‚µ‚Ä‚¢‚È‚¢‚Æ‚«
+            // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãŒå¤©äº•ã¾ã§åˆ°é”ã—ã¦ã„ãªã„ã¨ã
             else
             {
-                // ã‚ÉˆÚ“®‚³‚¹‚é
+                // å¤©äº•ã«ç§»å‹•ã•ã›ã‚‹
                 return new Vector2Int((int)DIRECT.NONE, (int)DIRECT.UP);
             }
         }
 
         private bool IsBlockRightEdge(Vector2Int index)
         {
-            // ƒCƒ“ƒfƒbƒNƒX‚ª‰E’[‚Ì‚Æ‚«
-            if (index.x >= m_rowSize - 1)
+            // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãŒå³ç«¯ã®ã¨ã
+            if (index.x > m_rowSize - 1)
             {
                 return true;
             }
-            // ƒCƒ“ƒfƒbƒNƒX‚ª‰E’[‚Ü‚Å“’B‚µ‚Ä‚¢‚È‚¢‚Æ‚«
+            // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãŒå³ç«¯ã¾ã§åˆ°é”ã—ã¦ã„ãªã„ã¨ã
             else
             {
                 return false;
@@ -154,12 +157,12 @@ namespace OtobeGame
 
         private bool IsBlockFloor(Vector2Int index)
         {
-            // ƒCƒ“ƒfƒbƒNƒX‚ª’ê‚Ì‚Æ‚«
-            if (index.y <= 0)
+            // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãŒåº•ã®ã¨ã
+            if (index.y < 0)
             {
                 return true;
             }
-            // ƒCƒ“ƒfƒbƒNƒX‚ª’ê‚Ü‚Å“’B‚µ‚Ä‚¢‚È‚¢‚Æ‚«
+            // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãŒåº•ã¾ã§åˆ°é”ã—ã¦ã„ãªã„ã¨ã
             else
             {
                 return false;

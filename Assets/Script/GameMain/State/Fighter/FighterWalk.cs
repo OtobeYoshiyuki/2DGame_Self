@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 using OtobeLib;
 
 namespace OtobeGame
@@ -29,47 +30,50 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            // InputSystemManagerを取得する
-            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
+            // FighterStateManagerを取得する
+            FighterStateManager stateManager = owner.stateManager as FighterStateManager;
+
+            // FighterCollisionManagerを取得する
+            FighterCollisionManager collisionManager = owner.collisionManager as FighterCollisionManager;
 
             // Moveに割り当てられているキーの値を取得する
-            Vector2 direct = inputSystemManager.playerInput.actions["Move"].ReadValue<Vector2>();
+            Vector2 direct = owner.control.OnMove();
 
             // ジャンプに対応するキーが押された時
-            if (inputSystemManager.playerInput.currentActionMap["Jump"].WasPressedThisFrame())
+            if (owner.control.OnJump())
             {
                 // ジャンプのステートに切り替える
-                owner.stateMachine.ChangeState(owner.jumpState);
+                stateManager.stateMachine.ChangeState(stateManager.jumpState);
             }
             // 歩いているときに落下したとき
-            else if (!owner.footCollider.CheckHitObject("Stage"))
+            else if (!owner.IsFloor(collisionManager.footCollider))
             {
                 // 落下のステートに切り替える
-                owner.stateMachine.ChangeState(owner.fallState);
+                stateManager.stateMachine.ChangeState(stateManager.fallState);
             }
             // しゃがみに対応するキーが押された時
-            else if (inputSystemManager.playerInput.currentActionMap["Crounch"].IsPressed())
+            else if (owner.control.OnCrounch())
             {
                 // しゃがみのステートに切り替える
-                owner.stateMachine.ChangeState(owner.crounchState);
+                stateManager.stateMachine.ChangeState(stateManager.crounchState);
             }
             // パンチに対応するキーが押された時、ステートを切り替える
-            else if (inputSystemManager.playerInput.currentActionMap["Punch"].WasPressedThisFrame())
+            else if (owner.control.OnPunch())
             {
                 // パンチのステートに切り替える
-                owner.stateMachine.ChangeState(owner.punchState);
+                stateManager.stateMachine.ChangeState(stateManager.punchState);
             }
             // キックに対応するキーが押された時、ステートを切り替える
-            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
+            else if (owner.control.OnKick())
             {
                 // キックのステートに切り替える
-                owner.stateMachine.ChangeState(owner.kickState);
+                stateManager.stateMachine.ChangeState(stateManager.kickState);
             }
             // キーの入力が1or - 1の時
             else if (!Mathf.Approximately(direct.x, 0.0f))
             {
                 // ダッシュに割り当てられたキーが押されている間
-                if (inputSystemManager.playerInput.currentActionMap["Dash"].IsPressed())
+                if (owner.control.OnDash())
                 {
                     // 移動アニメーションの速度を変更する
                     owner.animator.SetFloat("moveSpeed", m_runMotion);
@@ -86,7 +90,7 @@ namespace OtobeGame
                 // 現在の歩きのアニメーションのモーションスピードを取得する
                 float motionSpeed = owner.animator.GetFloat("moveSpeed");
 
-                // キーの入力に合わせて、オブジェクトを反転させる
+                // 入力に合わせて、オブジェクトを反転させる
                 owner.transform.localScale = new Vector3(direct.x * owner.scale.x, owner.scale.y, owner.scale.z);
 
                 // Fighterを移動させる
@@ -103,7 +107,10 @@ namespace OtobeGame
 
                 // 時間が一定値以上更新された場合は呼吸のステートに切り替える
                 // ※すぐに方向転換した場合は、ステートを移行しない
-                if (owner.time >= owner.ideleState.changeTime) owner.stateMachine.ChangeState(owner.ideleState);
+                if (owner.time >= stateManager.ideleState.changeTime)
+                {
+                    stateManager.stateMachine.ChangeState(stateManager.ideleState);
+                }
             }
         }
 
@@ -112,9 +119,7 @@ namespace OtobeGame
         /// ※物理演算を伴う更新
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
-        public override void OnFixedExecute(Fighter owner)
-        {
-        }
+        public override void OnFixedExecute(Fighter owner){ }
 
         /// <summary>
         /// Stateの実行処理

@@ -22,26 +22,29 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            // InputSystemManagerを取得する
-            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
+            // FighterStateManagerを取得する
+            FighterStateManager stateManager = owner.stateManager as FighterStateManager;
+
+            // FighterCollisionManagerを取得する
+            FighterCollisionManager collisionManager = owner.collisionManager as FighterCollisionManager;
 
             // キーから入力された値を取得する
-            Vector2 direct = inputSystemManager.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
+            Vector2 direct = owner.control.OnMove();
 
             // キーの入力が1or-1の時
             if (!Mathf.Approximately(direct.x, 0.0f))
             {
                 // ダッシュに割り当てられたキーが押されている間
-                if (inputSystemManager.playerInput.currentActionMap["Dash"].IsPressed())
+                if (owner.control.OnDash())
                 {
                     // ダッシュアニメーションの速度を変更する
-                    owner.animator.SetFloat("moveSpeed", owner.walkState.runMotion);
+                    owner.animator.SetFloat("moveSpeed", stateManager.walkState.runMotion);
                 }
                 // ダッシュキーが離されたら
                 else
                 {
                     // ダッシュアニメーションの速度を元に戻す
-                    owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
+                    owner.animator.SetFloat("moveSpeed", stateManager.walkState.defaltMotion);
                 }
 
                 // 現在の歩きのアニメーションのモーションスピードを取得する
@@ -58,24 +61,22 @@ namespace OtobeGame
             }
 
             // 着地した
-            if (owner.footCollider.CheckHitObject("Stage"))
+            if (owner.IsFloor(collisionManager.footCollider))
             {
                 // ステートを切り替える
-                owner.stateMachine.ChangeState(owner.ideleState);
+                stateManager.stateMachine.ChangeState(stateManager.ideleState);
 
-                // 空中蹴りのフラグを初期化する
-                owner.flyingKickState.isAtack = false;
+                // 攻撃判定を終了する
+                stateManager.flyingKickState.isAtack = false;
             }
-
             // 空中でキックに対応するキーが押されていて、まだ攻撃していないとき
-            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame() &&
-                !owner.flyingKickState.isAtack)
+            else if (owner.control.OnKick() && !stateManager.flyingKickState.isAtack)
             {
                 // ステートを切り替える
-                owner.stateMachine.ChangeState(owner.flyingKickState);
+                stateManager.stateMachine.ChangeState(stateManager.flyingKickState);
 
-                // 攻撃フラグを立てる
-                owner.flyingKickState.isAtack = true;
+                // 攻撃中にする
+                stateManager.flyingKickState.isAtack = true;
             }
         }
 

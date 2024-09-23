@@ -88,7 +88,7 @@ namespace OtobeLib
         /// <param name="csvDatas">対象のCsvデータ</param>
         /// <param name="inputData">検索する文字列</param>
         /// <returns>文字列が入っているインデックス</returns>
-        public TwoDimensions Find_InputData_Index(List<List<string>> csvDatas,string inputData)
+        public TwoDimensions FindInputData_Index(List<List<string>> csvDatas,string inputData)
         {
             for (int i = 0; i < csvDatas.Count; i++)
             {
@@ -110,7 +110,7 @@ namespace OtobeLib
         /// <param name="first">開始のインデックス</param>
         /// <param name="finish">終了のインデックス</param>
         /// <returns>変換後のファイルの情報</returns>
-        public List<List<string>> Use_InputData(List<List<string>> before, TwoDimensions first, TwoDimensions finish)
+        public List<List<string>> UseInputData(List<List<string>> before, TwoDimensions first, TwoDimensions finish)
         {
             //変換するコンテナを宣言する
             List<List<string>> convertList = new List<List<string>>();

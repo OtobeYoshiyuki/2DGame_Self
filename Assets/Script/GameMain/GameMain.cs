@@ -23,6 +23,9 @@ namespace OtobeGame
         //左矢印キーが押された時の定数
         public const float LEFTPUSH = -1.0f;
 
+        // リソースの管理クラス
+        private ResourceManager m_resourceManagar = null;
+
         //シーンの管理クラス
         private SceneManager m_sceneManager = null;
 
@@ -43,6 +46,10 @@ namespace OtobeGame
         /// </summary>
         private void Start()
         {
+            // リソースの管理クラスを生成する
+            m_resourceManagar = GameObject.Find(ResourceManager.OBJECT_NAME).GetComponent<ResourceManager>();
+            m_resourceManagar.Load();
+
             //シーンの制御クラスを生成する
             m_sceneManager = new SceneManager();
             m_sceneManager.Init();
@@ -58,11 +65,11 @@ namespace OtobeGame
 
             //StatusManagerを探す
             m_statusManager = GameObject.Find(StatusManager.OBJECT_NAME).GetComponent<StatusManager>();
-            m_statusManager.Init();
+            m_statusManager.Init(); 
 
             //KeyConfigManagerを探す
             m_keyConfigManager = GameObject.Find("KeyConfigManager").GetComponent<KeyConfigManager>();
-
+             
             // InputSystemManagerを探す
             m_inputSystemManager = GameObject.Find("InputManager").GetComponent<InputSystemManager>();
             m_inputSystemManager.InitPlayerInput();
@@ -71,6 +78,9 @@ namespace OtobeGame
             m_fadeManager = GameObject.Find("FadeManager").GetComponent<FadeManager>();
             m_fadeManager.InitFadeCanvas(FadeManager.FADESTATE.NONE);
             m_fadeManager.FadeInFadeOut();
+
+            // サービスロケーターにResourceManagerを登録する
+            Locater.Bind(m_resourceManagar);
 
             //サービスロケーターにSceneManagerを登録する
             Locater.Bind(m_sceneManager);

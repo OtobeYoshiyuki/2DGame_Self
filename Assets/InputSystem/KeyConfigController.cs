@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using DG.Tweening;
+using OtobeGame;
 
 namespace OtobeLib
 {
@@ -11,7 +13,7 @@ namespace OtobeLib
     /// </summary>
     public class KeyConfigController : MonoBehaviour
     {
-        public enum GAME_DEVICE
+        public enum GAME_DEVICE: int
         {
             KEYBORD = 0,
             GAMEPAD,
@@ -28,7 +30,7 @@ namespace OtobeLib
 
         // スクロールの移動量
         //private int m_scrollMove = 0;
-        public const int MAX_SCROLL = 4;
+        public const int MAX_SCROLL = 5;
         public const int MIN_SCROLL = 0;
 
         // メニュー一覧の初期座礁
@@ -36,7 +38,7 @@ namespace OtobeLib
         public Vector3 INIT_BOTOM = new Vector3(-930.0f, 915.0f, 0.0f);
 
         // 1スクロールの値
-        public const float ONE_SCROLL = 50.0f;
+        public const float ONE_SCROLL = 103.0f;
 
         /// <summary>
         /// キーバインドのテキストの初期化処理
@@ -52,109 +54,70 @@ namespace OtobeLib
                 // ボタンのとき
                 if (i < (int)KeyConfigManager.ACTION.MOVE)
                 {
-                    // Actions直下のゲームオブジェクトを取得する
-                    GameObject action = gameObject.transform.GetChild(i).gameObject;
-
-                    // キーボードとゲームパッドのオブジェクトを取得する
-                    GameObject keybord = action.transform.GetChild(0).GetChild(0).gameObject;
-                    GameObject gamepad = action.transform.GetChild(0).GetChild(1).gameObject;
-
-                    // 入力情報を取得する
-                    KeyConfigManager.InputAcitonReferenceInfo info = keyConfigManager.GetActionReference(i);
-                    KeyConfigManager.ChangeKeyConfig config = keyConfigManager.GetChangeConfig(i);
-
-                    if (config.keybordText == null)
-                    {
-                        // キーボードのテキストを変更する
-                        keybord.GetComponent<Text>().text = info.keybordText;
-
-                        // キーボードのカラーを変更する
-                        keybord.GetComponent<Text>().color = Color.white;
-                    }
-                    else 
-                    {
-                        // キーボードのテキストを変更する
-                        keybord.GetComponent<Text>().text = config.keybordText;
-
-                        // キーボードのカラーを変更する
-                        keybord.GetComponent<Text>().color = config.keybordColor;
-                    }
-
-                    if (config.gamepadText == null)
-                    {
-                        // ゲームパッドのテキストを変更する
-                        gamepad.GetComponent<Text>().text = info.gamepadText;
-
-                        // ゲームパッドのカラーを変更する
-                        gamepad.GetComponent<Text>().color = Color.white;
-                    }
-                    else 
-                    {
-                        // ゲームパッドのテキストを変更する
-                        gamepad.GetComponent<Text>().text = config.gamepadText;
-
-                        // ゲームパッドのカラーを変更する
-                        gamepad.GetComponent<Text>().color = config.gamepadColor;
-                    }
+                    // デバイス情報を初期化する
+                    DeviceInfoDrawInit(i, GameMain.NULL);
                 }
                 // 2DVectorのとき
                 else
                 {
-                    int shiftIndex;
-                    if (i == (int)KeyConfigManager.ACTION2D.MOVE_LEFT)
-                    {
-                        shiftIndex = 0;
-                    }
-                    else
-                    {
-                        shiftIndex = 1;
-                    }
-
-                    // Actions直下のゲームオブジェクトを取得する
-                    GameObject action = gameObject.transform.GetChild(i - shiftIndex).gameObject;
-
-                    // キーボードとゲームパッドのオブジェクトを取得する
-                    GameObject keybord = action.transform.GetChild(shiftIndex).GetChild(0).gameObject;
-                    GameObject gamepad = action.transform.GetChild(shiftIndex).GetChild(1).gameObject;
-
-                    // 入力情報を取得する
-                    KeyConfigManager.InputAcitonReferenceInfo info = keyConfigManager.GetActionReference(i);
-                    KeyConfigManager.ChangeKeyConfig config = keyConfigManager.GetChangeConfig(i);
-
-                    if (config.keybordText == null)
-                    {
-                        // キーボードのテキストを変更する
-                        keybord.GetComponent<Text>().text = info.keybordText;
-
-                        // キーボードのカラーを変更する
-                        keybord.GetComponent<Text>().color = Color.white;
-                    }
-                    else
-                    {
-                        // キーボードのテキストを変更する
-                        keybord.GetComponent<Text>().text = config.keybordText;
-
-                        // キーボードのカラーを変更する
-                        keybord.GetComponent<Text>().color = config.keybordColor;
-                    }
-
-                    if (config.gamepadText == null)
-                    {
-                        // ゲームパッドのテキストを変更する
-                        gamepad.GetComponent<Text>().text = info.gamepadText;
-
-                        // ゲームパッドのカラーを変更する
-                        gamepad.GetComponent<Text>().color = Color.white;
-                    }
-                    else
-                    {
-                        // ゲームパッドのテキストを変更する
-                        gamepad.GetComponent<Text>().text = config.gamepadText;
-
-                        // ゲームパッドのカラーを変更する
-                        gamepad.GetComponent<Text>().color = config.gamepadColor;
-                    }
+                    // デバイス情報を初期化する
+                    int shiftIndex = i == (int)KeyConfigManager.ACTION2D.MOVE_LEFT ? 0 : 1;
+                    DeviceInfoDrawInit(i, shiftIndex);
                 }
+            }
+        }
+
+        /// <summary>
+        /// デバイス情報を初期化する
+        /// </summary>
+        /// <param name="nowLoop">現在のループ</param>
+        /// <param name="targetIndex">対象のインデックス</param>
+        private void DeviceInfoDrawInit(int nowLoop, int targetIndex)
+        {
+            // キーコンフィグを取得する
+            KeyConfigManager keyConfigManager = Locater.Get<KeyConfigManager>();
+
+            // Actions直下のゲームオブジェクトを取得する
+            GameObject action = gameObject.transform.GetChild(nowLoop - targetIndex).gameObject;
+
+            // キーボードとゲームパッドのオブジェクトを取得する
+            GameObject keybord = action.transform.GetChild(targetIndex).GetChild((int)GAME_DEVICE.KEYBORD).gameObject;
+            GameObject gamepad = action.transform.GetChild(targetIndex).GetChild((int)GAME_DEVICE.GAMEPAD).gameObject;
+
+            // 入力情報を取得する
+            KeyConfigManager.InputAcitonReferenceInfo info = keyConfigManager.GetActionReference(nowLoop);
+            KeyConfigManager.ChangeKeyConfig config = keyConfigManager.GetChangeConfig(nowLoop);
+
+            // キーボードの表示を変更する
+            ChangeDrawDeviceInfo(info.keybordText, config.keybordText, config.keybordColor, keybord);
+
+            // ゲームパッドの表示を変更する
+            ChangeDrawDeviceInfo(info.gamepadText, config.gamepadText, config.gamepadColor, gamepad);
+        }
+
+        /// <summary>
+        /// デバイスの表示情報を変更する
+        /// </summary>
+        /// <param name="initDevicePath">デバイス情報の初期化文字</param>
+        /// <param name="changeDevicePath">デバイス情報の更新文字</param>
+        /// <param name="device">対象のデバイス</param>
+        private void ChangeDrawDeviceInfo(string initDevicePath, string changeDevicePath, Color changeDeviceColor, GameObject device)
+        {
+            if (changeDevicePath == null)
+            {
+                // 対象デバイスのテキストを変更する
+                device.GetComponent<Text>().text = initDevicePath;
+
+                // 対象デバイスのカラーを変更する
+                device.GetComponent<Text>().color = Color.white;
+            }
+            else
+            {
+                // 対象デバイスのテキストを変更する
+                device.GetComponent<Text>().text = changeDevicePath;
+
+                // 対象デバイスのカラーを変更する
+                device.GetComponent<Text>().color = changeDeviceColor;
             }
         }
 
