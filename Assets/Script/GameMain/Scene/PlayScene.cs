@@ -11,21 +11,24 @@ namespace OtobeGame
     /// </summary>
     public class PlayScene : ISceneBase
     {
-        //シーンの名前
+        // シーンの名前
         public const string SCENE_NAME = "PlayScene";
 
-        //キャラクターの管理クラス
+        // キャラクターの管理クラス
         private CharaManager m_characterManager = null;
-        public CharaManager characterManager { get { return m_characterManager; } }
+        public CharaManager characterManager => m_characterManager;
+
+        // ステージの管理クラス
+        private StageManager m_stageManager = null;
+        public StageManager stageManager => m_stageManager;
 
         // 背景のスクロールクラス
         private BackGroundMover m_backMover = null;
-        public BackGroundMover backMover { get { return m_backMover; } }
+        public BackGroundMover backMover => m_backMover;
 
-        // 爆発ブロックの管理クラス
-        private ExBlockManager m_exBlockManager = null;
-
+        // ChineMachineのカメラクラス
         private CinemachineVirtualCamera m_virtualCamera = null;
+        public CinemachineVirtualCamera virtualCamera => m_virtualCamera;
 
         // シーンの切り替えを管理するフラグ
         private bool m_playChange = false;
@@ -40,9 +43,16 @@ namespace OtobeGame
         /// </summary>
         public void Init()
         {
+            // ステージの管理クラスを取得する
+            m_stageManager = GameObject.Find(StageManager.OBJECT_NAME).GetComponent<StageManager>();
+            m_stageManager.Load(1);
+
             // 背景のスクロールクラスを取得する
             m_backMover = GameObject.Find("PlayUI").transform.GetChild(0).GetComponent<BackGroundMover>();
             m_backMover.InitBackGrond();
+
+            // サービスロケーターにStageManagerを登録する
+            Locater.Bind(m_stageManager);
 
             // サービスロケーターにPlaySceneを登録する
             Locater.Bind(this);
@@ -57,11 +67,8 @@ namespace OtobeGame
             // サービスロケーターにcharaManagerを登録する
             Locater.Bind(m_characterManager);
 
-            m_exBlockManager = GameObject.Find("Blocks1").GetComponent<ExBlockManager>();
-            m_exBlockManager.InitBlocks();
-
             m_virtualCamera = GameObject.Find("CMCamera").GetComponent<CinemachineVirtualCamera>();
-            m_virtualCamera.Follow = m_characterManager.GetHero().transform;
+            m_virtualCamera.Follow = (m_characterManager.GetHero() as Character).transform;
 
             CompositeCollider2D compositeCollider2D = GameObject.Find("Area").GetComponent<CompositeCollider2D>();
             m_virtualCamera.gameObject.GetComponent<CinemachineConfiner>().m_BoundingShape2D = compositeCollider2D;
@@ -76,11 +83,17 @@ namespace OtobeGame
         /// </summary>
         public void Update()
         {
+            //FadeManager fadeManager = Locater.Get<FadeManager>();
+            //if (fadeManager.fadeState != FadeManager.FADESTATE.GAME) return;
+
             // SceneManagerを取得する
             SceneManager sceneManager = Locater.Get<SceneManager>();
 
             // InputSystemManagerを取得する
             InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
+
+            // StageManagerを更新する
+            m_stageManager.UpdateStage();
 
             // CharacterManagerを更新する
             m_characterManager.UpdateCharacters();

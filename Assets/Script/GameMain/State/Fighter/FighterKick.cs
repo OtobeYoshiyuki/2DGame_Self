@@ -22,18 +22,21 @@ namespace OtobeLib
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
+            // FighterStateManagerを取得する
+            FighterStateManager stateManager = owner.stateManager as FighterStateManager;
+
+            // FighterCollisionManagerを取得する
+            FighterCollisionManager collisionManager = owner.collisionManager as FighterCollisionManager;
+
             //キックのアニメーションが終了したら、ステートを切り替える
             if (owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= m_finishAnime)
-                owner.stateMachine.ChangeState(owner.ideleState);
-
-            //キック中に落下したら、ステートを切り替える
-            else if (!owner.footCollider.CheckHitObject("Stage"))
             {
-                owner.stateMachine.ChangeState(owner.fallState);
+                stateManager.stateMachine.ChangeState(stateManager.ideleState);
             }
-            else if (owner.kickCollider.CheckHitObject(ExBlockManager.EXPROSION_TAG))
+            //キック中に落下したら、ステートを切り替える
+            else if (!owner.IsFloor(collisionManager.footCollider))
             {
-                owner.ExBlockBrakeStart(owner.kickCollider);
+                stateManager.stateMachine.ChangeState(stateManager.fallState);
             }
         }
 
@@ -65,9 +68,12 @@ namespace OtobeLib
         {
             Debug.Log("キックステート");
 
+            // FighterStateManagerを取得する
+            FighterStateManager stateManager = owner.stateManager as FighterStateManager;
+
             //Fighterのアニメーションを呼吸に切り替える
             owner.animator.SetInteger("Fighter_Anime", (int)Fighter.FITER_ANIMATION.KICK);
-            owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
+            owner.animator.SetFloat("moveSpeed", stateManager.walkState.defaltMotion);
 
             //Stateの計測時間を初期化する
             owner.time = 0.0f;

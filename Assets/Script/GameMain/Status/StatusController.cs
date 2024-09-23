@@ -7,10 +7,8 @@ using UnityEngine;
 /// </summary>
 public class StatusController 
 {
-    /// <summary>
     /// ステータスの連想配列
     /// 変動するステータスのみアクセス可能(変動しないものはデータベースが管理している)
-    /// </summary>
     private Dictionary<string, float> m_status = new Dictionary<string, float>();
 
     /// <summary>

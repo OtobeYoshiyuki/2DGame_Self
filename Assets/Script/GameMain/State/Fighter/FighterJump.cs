@@ -21,20 +21,25 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            // InputSystemManagerを取得する
-            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
+            // FighterStateManagerを取得する
+            FighterStateManager stateManager = owner.stateManager as FighterStateManager;
 
             //キーから入力された値を取得する
-            Vector2 direct = inputSystemManager.playerInput.currentActionMap["Move"].ReadValue<Vector2>();
+            Vector2 direct = owner.control.OnMove();
 
             //キーの入力が1or-1の時
             if (!Mathf.Approximately(direct.x, 0.0f))
             {
                 //ダッシュに割り当てられたキーが押されている間、アニメーションの速度を変更する
-                if (inputSystemManager.playerInput.currentActionMap["Dash"].IsPressed()) 
-                    owner.animator.SetFloat("moveSpeed", owner.walkState.runMotion);
+                if (owner.control.OnDash())
+                {
+                    owner.animator.SetFloat("moveSpeed", stateManager.walkState.runMotion);
+                }
                 //キーが離されたら、アニメーションの速度をもとに戻す
-                else owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
+                else
+                {
+                    owner.animator.SetFloat("moveSpeed", stateManager.walkState.defaltMotion);
+                }
 
                 //現在の歩きのアニメーションのモーションスピードを取得する
                 float motionSpeed = owner.animator.GetFloat("moveSpeed");
@@ -43,27 +48,23 @@ namespace OtobeGame
                 owner.transform.localScale = new Vector3(direct.x * owner.scale.x, owner.scale.y, owner.scale.z);
 
                 //Fighterを移動させる
-                owner.rigidBody2D.velocity = new Vector2(owner.moveSpeed.x * direct.x * motionSpeed,owner.rigidBody2D.velocity.y);
+                owner.rigidBody2D.velocity = new Vector2(owner.moveSpeed.x * direct.x * motionSpeed, owner.rigidBody2D.velocity.y);
 
                 //ステートの時間を初期化する
                 owner.time = 0.0f;
             }
 
             //Fighterが落下し始めたら、ステートを切り替える
-            if (owner.rigidBody2D.velocity.y <= owner.fallState.fallPower)
-                owner.stateMachine.ChangeState(owner.fallState);
-
-            //空中でキックに対応するキーが押された時
-            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
+            if (owner.rigidBody2D.velocity.y <= stateManager.fallState.fallPower)
             {
-                //ステートを切り替える
-                owner.stateMachine.ChangeState(owner.flyingKickState);
-
-                //攻撃フラグを立てる
-                owner.flyingKickState.isAtack = true;
+                stateManager.stateMachine.ChangeState(stateManager.fallState);
             }
-
-
+            //空中でキックに対応するキーが押された時
+            else if (owner.control.OnKick())
+            {
+                // ステートを切り替える
+                stateManager.stateMachine.ChangeState(stateManager.flyingKickState);
+            }
         }
 
         /// <summary>
@@ -105,9 +106,9 @@ namespace OtobeGame
         /// </summary>
         /// <param name="owner">インスタンスの所有者</param>
         /// <param name="nextState">次のState</param>
-        public override void OnExit(Fighter owner, StateBase<Fighter> nextState) 
-        { 
-            
+        public override void OnExit(Fighter owner, StateBase<Fighter> nextState)
+        {
+
         }
     }
 

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 370798437827485854}
   - component: {fileID: 7825593231326630259}
   - component: {fileID: 4525425017653400037}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: DashEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,7 +129,7 @@ GameObject:
   - component: {fileID: 4836764281030454666}
   - component: {fileID: 4836764281030454667}
   - component: {fileID: 3994777121602367308}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,8 +202,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4836764281194625240}
   - component: {fileID: 5562778442590532918}
-  - component: {fileID: 6646202395442722687}
-  m_Layer: 8
+  - component: {fileID: 153607250428575958}
+  m_Layer: 7
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -241,7 +241,7 @@ CapsuleCollider2D:
   m_Offset: {x: -0.0034595728, y: -0.08072348}
   m_Size: {x: 0.14, y: 0.43}
   m_Direction: 0
---- !u!114 &6646202395442722687
+--- !u!114 &153607250428575958
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -267,7 +267,7 @@ GameObject:
   - component: {fileID: 4836764281406038482}
   - component: {fileID: 4836764281406038494}
   - component: {fileID: -7025639693677536296}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Fighter
   m_TagString: Fighter
   m_Icon: {fileID: 0}
@@ -282,9 +282,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4836764281406038481}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.5599995, y: -2.4699998, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: -4.5599995, y: -4, z: 0}
+  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4836764281194625240}
   - {fileID: 4836764281030454666}
@@ -308,12 +308,12 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 0.8
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 7
+  m_AngularDrag: 0.02
+  m_GravityScale: 5
   m_Material: {fileID: 6200000, guid: 81905e5e6725d7f48adb7ebaf28e6a58, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &4836764281406038494
 MonoBehaviour:
@@ -329,25 +329,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_rotAngle: {x: 0, y: 0, z: 0}
   m_moveSpeed: {x: 2, y: 0, z: 0}
-  m_scale: {x: 5, y: 5, z: 5}
-  m_ideleState:
-    m_changeTime: 0.15
-  m_walkState:
-    m_defaltMotion: 1
-    m_runMotion: 2.5
-  m_jumpState:
-    m_jumpPower: 20
-  m_fallState:
-    m_fallPower: -0.1
-  m_punchState:
-    m_finishAnime: 1
-  m_kickState:
-    m_finishAnime: 1
-  m_crouchKickState:
-    m_finishAnime: 1
-  m_flyingKickState:
-    m_atackTime: 1
-    m_kickPower: {x: 1000, y: 0}
+  m_scale: {x: 3, y: 3, z: 3}
+  m_stateManager:
+    m_ideleState:
+      m_changeTime: 0.15
+    m_walkState:
+      m_defaltMotion: 1
+      m_runMotion: 2.5
+    m_jumpState:
+      m_jumpPower: 16
+    m_fallState:
+      m_fallPower: 0
+    m_punchState:
+      m_finishAnime: 1
+    m_kickState:
+      m_finishAnime: 1
+    m_crouchKickState:
+      m_finishAnime: 1
+    m_flyingKickState:
+      m_atackTime: 1
+      m_kickPower: {x: 700, y: 0}
 --- !u!95 &-7025639693677536296
 Animator:
   serializedVersion: 4
@@ -379,7 +380,7 @@ GameObject:
   - component: {fileID: 4836764281611537124}
   - component: {fileID: 4836764281611537125}
   - component: {fileID: 5890196924586057689}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Foot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -441,7 +442,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_objectsTag:
-  - Stage
+  - Floor
+  - Box
 --- !u!1 &6025204699597886554
 GameObject:
   m_ObjectHideFlags: 0
@@ -452,7 +454,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7954530794885631320}
   - component: {fileID: 8776845992681092264}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -537,7 +539,7 @@ GameObject:
   - component: {fileID: 5244930631687230081}
   - component: {fileID: 5245536644374604265}
   - component: {fileID: 6427820848106949928}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Kick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -600,4 +602,5 @@ MonoBehaviour:
   m_objectsTag:
   - Enemy
   - Explosion
-  - Stage
+  - Floor
+  - Box

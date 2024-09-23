@@ -40,6 +40,7 @@ public class FadeManager : MonoBehaviour
     private int m_ruleIndex = 0;
 
     private FADESTATE m_fadeState = FADESTATE.NONE;
+    public FADESTATE fadeState => m_fadeState;
 
     /// <summary>
     /// フェードの初期化処理

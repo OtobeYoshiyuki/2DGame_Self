@@ -82,10 +82,10 @@ namespace OtobeLib
                 m_gamepadDefaultTexts.Add(info.gamepadText);
 
                 // 空のデータを入れる
-                ChangeKeyConfig ChangeKeyConfig = new ChangeKeyConfig();
-                ChangeKeyConfig.keybordColor = Color.white;
-                ChangeKeyConfig.gamepadColor = Color.white;
-                m_changeKeyConfigs.Add(ChangeKeyConfig);
+                ChangeKeyConfig changeKeyConfig = new ChangeKeyConfig();
+                changeKeyConfig.keybordColor = Color.white;
+                changeKeyConfig.gamepadColor = Color.white;
+                m_changeKeyConfigs.Add(changeKeyConfig);
             }
 
             // キーの状態を読み込む
@@ -119,12 +119,14 @@ namespace OtobeLib
             // InputSystemManagerを取得する
             InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
 
+            // キーボードのテキストを初期化する
             foreach (string text in m_keybordDefaultTexts)
             {
                 int index = m_keybordDefaultTexts.IndexOf(text);
                 m_changeKeyConfigs[index].keybordText = text;
             }
 
+            // ゲームパッドのテキストを初期化する
             foreach (string text in m_gamepadDefaultTexts)
             {
                 int index = m_gamepadDefaultTexts.IndexOf(text);
@@ -211,7 +213,6 @@ namespace OtobeLib
         /// <summary>
         /// キーをリバインディングするときに呼ばれる処理(Button用)
         /// </summary>
-        /// <param name="playerInput">キー入力関連のクラス</param>
         /// <param name="index">対象の配列の添え字</param>
         /// <param name="contoller">キーコンフィグ表示の制御クラス</param>
         public void StartRebindingButton(int index, KeyConfigController contoller)
@@ -234,8 +235,8 @@ namespace OtobeLib
 
                 // 選択したボタンのリバインディング開始
                 m_bindingOperation = action.PerformInteractiveRebinding()
-                    .WithTargetBinding(0).WithControlsExcluding("Mouse")
-                    .OnComplete(operation => RebindComplateButton(m_changeKeyConfigs[index], 0, contoller, action))
+                    .WithTargetBinding((int)KeyConfigController.GAME_DEVICE.KEYBORD).WithControlsExcluding("Mouse")
+                    .OnComplete(operation => RebindComplateButton(m_changeKeyConfigs[index], (int)KeyConfigController.GAME_DEVICE.KEYBORD, contoller, action))
                     .Start();
             }
             else
@@ -246,8 +247,8 @@ namespace OtobeLib
 
                 // 選択したボタンのリバインディング開始
                 m_bindingOperation = action.PerformInteractiveRebinding()
-                    .WithTargetBinding(1).WithControlsExcluding("Mouse")
-                    .OnComplete(operation => RebindComplateButton(m_changeKeyConfigs[index], 1, contoller, action))
+                    .WithTargetBinding((int)KeyConfigController.GAME_DEVICE.GAMEPAD).WithControlsExcluding("Mouse")
+                    .OnComplete(operation => RebindComplateButton(m_changeKeyConfigs[index], (int)KeyConfigController.GAME_DEVICE.GAMEPAD, contoller, action))
                     .Start();
             }
         }
@@ -255,7 +256,6 @@ namespace OtobeLib
         /// <summary>
         /// キーのリバインディングが終了したら呼ばれる処理
         /// </summary>
-        /// <param name="playerInput">キー入力関連のクラス</param>
         /// <param name="changeKey">キーコンフィグの情報</param>
         /// <param name="control">ゲームパッドの種類</param>
         /// <param name="contoller">キーコンフィグの表示の制御クラス</param>
@@ -295,7 +295,6 @@ namespace OtobeLib
         /// <summary>
         /// キーをリバインディングするときに呼ばれる処理(2DVector用)
         /// </summary>
-        /// <param name="playerInput">キー入力関連のクラス</param>
         /// <param name="index">対象の配列の添え字</param>
         /// <param name="contoller">キーコンフィグ表示の制御クラス</param>
         public void StartRebinding2DVector(int index, int indexPart,
@@ -317,7 +316,7 @@ namespace OtobeLib
                 // 選択したボタンのリバインディング開始
                 m_bindingOperation = action.PerformInteractiveRebinding()
                     .WithTargetBinding(3 + indexPart).WithControlsExcluding("Mouse")
-                    .OnMatchWaitForAnother(0.2f)
+                    .OnMatchWaitForAnother(0.15f)
                     .OnComplete(operation => RebindComplate2DVector(m_changeKeyConfigs[index], 0,
                     contoller, action, index, indexPart, moveSize))
                     .Start();
@@ -331,7 +330,7 @@ namespace OtobeLib
                 // 選択したボタンのリバインディング開始
                 m_bindingOperation = action.PerformInteractiveRebinding()
                     .WithTargetBinding(8 + indexPart).WithControlsExcluding("Mouse")
-                    .OnMatchWaitForAnother(0.2f)
+                    .OnMatchWaitForAnother(0.15f)
                     .OnComplete(operation => RebindComplate2DVector(m_changeKeyConfigs[index], 1,
                     contoller, action, index, indexPart, moveSize))
                     .Start();
@@ -341,7 +340,6 @@ namespace OtobeLib
         /// <summary>
         /// キーのリバインディングが終了したら呼ばれる処理
         /// </summary>
-        /// <param name="playerInput">キー入力関連のクラス</param>
         /// <param name="changeKey">キーコンフィグの情報</param>
         /// <param name="control">ゲームパッドの種類</param>
         /// <param name="contoller">キーコンフィグの表示の制御クラス</param>
