@@ -19,13 +19,13 @@ namespace OtobeGame
         }
 
         //操作するキャラクター
-        private Hero m_heroCharacter = null;
+        private ICharacter m_heroCharacter = null;
 
         //ステージ上にいる敵キャラクター
-        private List<Enemy> m_enemyCharacters = null;
+        private List<ICharacter> m_enemyCharacters = null;
 
         //ステージ上にいる全てのキャラクター
-        private List<Character> m_allCharacters = null;
+        private List<ICharacter> m_allCharacters = null;
 
         /// <summary>
         /// CharacterManagerの初期化処理
@@ -33,20 +33,17 @@ namespace OtobeGame
         public void InitCharaManager()
         {
             //操作キャラを生成する
-            GameObject gameObject = Resources.Load("Fighter") as GameObject;
-            GameObject fighter = Instantiate(gameObject);
+            ResourceManager resourceManager = Locater.Get<ResourceManager>();
+            GameObject fighter = Instantiate(resourceManager.GetResource("Fighter"));
             m_heroCharacter = fighter.GetComponent<Fighter>();
-            m_heroCharacter.InitCharacter();
-
-            //InstantiateされたオブジェクトはManagerSceneに作られるため、PlaySceneに移動させる
-            UnityEngine.SceneManagement.Scene playScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(PlayScene.SCENE_NAME);
-            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(fighter, playScene);
+            m_heroCharacter.InitCharacter(new UserController());
+            SceneManager.MoveObjectNowScene(PlayScene.SCENE_NAME, fighter);
 
             //敵キャラのコンテナを生成する
-            m_enemyCharacters = new List<Enemy>();
+            m_enemyCharacters = new List<ICharacter>();
 
             //全キャラクターのコンテナを生成する
-            m_allCharacters = new List<Character>();
+            m_allCharacters = new List<ICharacter>();
 
             //敵キャラをコンテナに追加する
 
@@ -60,10 +57,10 @@ namespace OtobeGame
         public void UpdateCharacters()
         {
             //処理順にソートする（昇順）
-            m_allCharacters.Sort((x, y) => x.orderBy - y.orderBy);
-            m_enemyCharacters.Sort((x, y) => x.orderBy - y.orderBy);
+            m_allCharacters.Sort((x, y) => x.order - y.order);
+            m_enemyCharacters.Sort((x, y) => x.order - y.order);
 
-            foreach (Character ch in m_allCharacters)
+            foreach (ICharacter ch in m_allCharacters)
             {
                 //全キャラクターの更新をする
                 ch?.UpdateCharacter();
@@ -76,7 +73,7 @@ namespace OtobeGame
         /// </summary>
         public void FixedUpdateCharacters()
         {
-            foreach (Character ch in m_allCharacters)
+            foreach (ICharacter ch in m_allCharacters)
             {
                 //全キャラクターの更新をする
                 ch?.FixedUpdateCharacter();
@@ -89,7 +86,7 @@ namespace OtobeGame
         /// </summary>
         public void LateUpdateCharacters()
         {
-            foreach (Character ch in m_allCharacters)
+            foreach (ICharacter ch in m_allCharacters)
             {
                 //全キャラクターの更新をする
                 ch?.LateUpdateCharacter();
@@ -97,18 +94,10 @@ namespace OtobeGame
         }
 
         /// <summary>
-        /// Heroを継承した操作キャラのスクリプトを探す
+        /// 操作キャラを取得する
         /// </summary>
-        /// <typeparam name="T">Heroを継承したクラス</typeparam>
-        /// <param name="tag">インスペクタ上のオブジェクトの名前</param>
-        /// <returns>Heroを継承したスクリプト</returns>
-        private T FindHeroCharacter<T>(string tag) where T : Hero
-        {
-            //Heroを継承したスクリプトを返す
-            return GameObject.Find(tag).GetComponent<T>();
-        }
-
-        public Hero GetHero() { return m_heroCharacter; }
+        /// <returns>操作キャラ</returns>
+        public ICharacter GetHero() { return m_heroCharacter; }
     }
 
 }

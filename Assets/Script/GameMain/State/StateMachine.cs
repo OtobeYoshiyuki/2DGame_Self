@@ -6,7 +6,7 @@ using UnityEngine;
 /// 有限StateMachine
 /// ジェネリック型（テンプレートにはStateの所有者の型を入れる）
 /// </summary>
-/// <typeparam name="T">StateBaseを継承した型を入れる</typeparam>
+/// <typeparam name="T">StateMachineの所有者</typeparam>
 namespace OtobeLib
 {
     public class StateMachine<T> where T : class

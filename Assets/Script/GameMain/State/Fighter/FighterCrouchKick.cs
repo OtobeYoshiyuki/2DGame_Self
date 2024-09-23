@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using OtobeGame;
+using OtobeLib;
 
-namespace OtobeLib
+namespace OtobeGame
 {
     /// <summary>
     /// ステート（しゃがみ蹴りの状態）
@@ -21,16 +21,12 @@ namespace OtobeLib
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
+            // FighterStateManagerを取得する
+            FighterStateManager stateManager = owner.stateManager as FighterStateManager;
+
             //キックのアニメーションが終了したら、ステートを切り替える
             if (owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= m_finishAnime)
-                owner.stateMachine.ChangeState(owner.crounchState);
-
-            // 爆発物に当たったとき
-            else if (owner.kickCollider.CheckHitObject(ExBlockManager.EXPROSION_TAG))
-            {
-                // ブロックを爆発させる
-                owner.ExBlockBrakeStart(owner.kickCollider);
-            }
+                stateManager.stateMachine.ChangeState(stateManager.crounchState);
         }
 
         /// <summary>

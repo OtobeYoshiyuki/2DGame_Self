@@ -24,9 +24,9 @@ namespace OtobeLib
         protected Vector3 m_scale = Vector3.one;
         public Vector3 scale { get { return m_scale; } set { m_scale = value; } }
 
-        //2Dの物理演算
-        protected Rigidbody2D m_rigidBody2D = null;
-        public Rigidbody2D rigidBody2D { get { return m_rigidBody2D; } }
+        ////2Dの物理演算
+        //protected Rigidbody2D m_rigidBody2D = null;
+        //public Rigidbody2D rigidBody2D { get { return m_rigidBody2D; } }
     }
 }
 

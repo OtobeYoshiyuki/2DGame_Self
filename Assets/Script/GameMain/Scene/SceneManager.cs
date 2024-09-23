@@ -28,12 +28,6 @@ namespace OtobeLib
         // シーンを削除する数
         private int m_popCount = GameMain.NULL;
 
-        // シーンの生成中の判定
-        private bool m_sceneCreate = false;
-
-        // シーンの削除中の判定
-        private bool m_sceneDelete = false;
-
         /// <summary>
         /// SceneManagerの初期化処理
         /// </summary>
@@ -60,10 +54,22 @@ namespace OtobeLib
         /// </summary>
         public void Update()
         {
+            // シーンの更新処理を実行する
+            IEnumerator ie = SceneUpdate();
+            while (ie.MoveNext()) ;
+        }
+
+        /// <summary>
+        /// シーンの更新処理
+        /// </summary>
+        /// <returns>コルーチン</returns>
+        private IEnumerator SceneUpdate()
+        {
             //シーンの削除および終了処理
             for (int i = GameMain.NULL; i < m_popCount; i++)
             {
-                CoroutineHandler.instance.StartCoroutine(SceneDelete());
+                // シーンの削除が完了するまで待つ
+                yield return CoroutineHandler.instance.StartCoroutine(SceneDelete());
             }
 
             //削除カウントを初期化する
@@ -72,20 +78,18 @@ namespace OtobeLib
             //シーンの生成を行う
             foreach (string info in m_sceneInfo)
             {
-                CoroutineHandler.instance.StartCoroutine(SceneCreate(info));
+                // シーンの生成が完了するまで待つ
+                yield return CoroutineHandler.instance.StartCoroutine(SceneCreate(info));
             }
 
             //シーンの情報を削除する
             m_sceneInfo.Clear();
 
-            if (!m_sceneCreate && !m_sceneDelete)
+            //シーンが存在するとき
+            if (m_sceneList.Count > 0)
             {
-                //シーンが存在するとき
-                if (m_sceneList.Count > 0)
-                {
-                    //一番後ろのシーンを更新する
-                    m_sceneList.Last.Value.Update();
-                }
+                //一番後ろのシーンを更新する
+                m_sceneList.Last.Value.Update();
             }
         }
 
@@ -169,11 +173,13 @@ namespace OtobeLib
             m_popCount = Inspection;
         }
 
+        /// <summary>
+        /// シーンを生成する
+        /// </summary>
+        /// <param name="sceneName">生成するシーンの名前</param>
+        /// <returns>コルーチン</returns>
         public IEnumerator SceneCreate(string sceneName)
         {
-            // Sceneの生成中の判定
-            m_sceneCreate = true;
-
             // 非同期でロードを行う
             var asyncLoad = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
 
@@ -188,16 +194,14 @@ namespace OtobeLib
 
             // 生成したシーンの初期化を行う
             m_sceneList.Last.Value.Init();
-
-            // Sceneの生成終了
-            m_sceneCreate = false;
         }
 
+        /// <summary>
+        /// 現在、稼働しているシーンを削除する
+        /// </summary>
+        /// <returns>コルーチン</returns>
         public IEnumerator SceneDelete()
         {
-            // 削除中のフラグをONにする
-            m_sceneDelete = true;
-
             // 稼働しているシーンのFinalizeを呼ぶ
             m_sceneList.Last.Value.Final();
 
@@ -215,9 +219,6 @@ namespace OtobeLib
             AsyncOperation resource = Resources.UnloadUnusedAssets();
 
             yield return resource;
-
-            // 削除完了
-            m_sceneDelete = false;
         }
 
         /// <summary>
@@ -225,7 +226,7 @@ namespace OtobeLib
         /// </summary>
         /// <param name="thisScene">現在のシーン</param>
         /// <param name="sceneMode">ロードしたシーンのモード</param>
-        void LoadSceneChanged(Scene thisScene, LoadSceneMode sceneMode)
+        private void LoadSceneChanged(Scene thisScene, LoadSceneMode sceneMode)
         {
             // 新しいSceneを生成する
             ISceneBase newScene = m_sceneFactory[thisScene.name]();
@@ -240,6 +241,17 @@ namespace OtobeLib
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= LoadSceneChanged;
         }
 
+        /// <summary>
+        /// 生成したGameObjectを指定したSceneに移動させる
+        /// </summary>
+        /// <param name="sceneName">指定したシーンの名前</param>
+        /// <param name="gameObject">移動させるGameObject</param>
+        public static void MoveObjectNowScene(string sceneName, GameObject gameObject)
+        {
+            //InstantiateされたオブジェクトはManagerSceneに作られるため、PlaySceneに移動させる
+            Scene nowScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(gameObject, nowScene);
+        }
     }
 }
 

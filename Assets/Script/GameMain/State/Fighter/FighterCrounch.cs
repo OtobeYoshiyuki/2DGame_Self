@@ -17,23 +17,26 @@ namespace OtobeGame
         /// <param name="owner">インスタンスの所有者</param>
         public override void OnExecute(Fighter owner)
         {
-            // InputSystemManagerを取得する
-            InputSystemManager inputSystemManager = Locater.Get<InputSystemManager>();
+            // FighterStateManagerを取得する
+            FighterStateManager stateManager = owner.stateManager as FighterStateManager;
+
+            // FighterCollisionManagerを取得する
+            FighterCollisionManager collisionManager = owner.collisionManager as FighterCollisionManager;
 
             // しゃがみに対応するキーが離された時は、ステートを切り替える
-            if (!inputSystemManager.playerInput.currentActionMap["Crounch"].IsPressed())
+            if (!owner.control.OnCrounch())
             {
-                owner.stateMachine.ChangeState(owner.ideleState);
+                stateManager.stateMachine.ChangeState(stateManager.ideleState);
             }
             // キックに対応するキーが押された時、ステートを切り替える
-            else if (inputSystemManager.playerInput.currentActionMap["Kick"].WasPressedThisFrame())
+            else if (owner.control.OnKick())
             {
-                owner.stateMachine.ChangeState(owner.crouchKickState);
+                stateManager.stateMachine.ChangeState(stateManager.crouchKickState);
             }
             // 滑って落ちたら、ステートを切り替える
-            else if (!owner.footCollider.CheckHitObject("Stage"))
-            { 
-                owner.stateMachine.ChangeState(owner.fallState); 
+            else if (!owner.IsFloor(collisionManager.footCollider))
+            {
+                stateManager.stateMachine.ChangeState(stateManager.fallState); 
             }
         }
 
@@ -65,9 +68,12 @@ namespace OtobeGame
         {
             Debug.Log("しゃがみステート");
 
+            // FighterStateManagerを取得する
+            FighterStateManager stateManager = owner.stateManager as FighterStateManager;
+
             //Fighterのアニメーションをしゃがみに切り替える
             owner.animator.SetInteger("Fighter_Anime", (int)Fighter.FITER_ANIMATION.CROUCH);
-            owner.animator.SetFloat("moveSpeed", owner.walkState.defaltMotion);
+            owner.animator.SetFloat("moveSpeed", stateManager.walkState.defaltMotion);
 
             //Stateの計測時間を初期化する
             owner.time = 0.0f;

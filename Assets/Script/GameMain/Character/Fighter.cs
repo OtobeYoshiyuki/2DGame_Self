@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 /// 格闘家のキャラクター
 /// Heroクラスを継承
 /// </summary>
-public class Fighter : Hero
+public class Fighter : Character
 {
     //アニメーションの列挙体を用意する
     public enum FITER_ANIMATION
@@ -37,98 +37,38 @@ public class Fighter : Hero
         SPRITE          //画像
     }
 
-    //子供（足）の当たり判定を検出するクラス
-    HitChecker_Collider m_footCollider = null;
-    public HitChecker_Collider footCollider { get { return m_footCollider; } }
+    // ステートの管理クラス
+    [SerializeField]
+    private FighterStateManager m_stateManager = new FighterStateManager();
+    public override IStateManager stateManager => m_stateManager;
 
-    //子供（足の攻撃）の当たり判定を検出するクラス
-    HitChecker_Collider m_kickCollider = null;
-    public HitChecker_Collider kickCollider { get { return m_kickCollider; } }
-
-    // 子供(腕の攻撃)の当たり判定を検出するクラス
-    HitChecker_Collider m_armCollider = null;
-    public HitChecker_Collider armCollider { get { return m_armCollider; } }
-
-    // 子供(体)の当たり判定を検出するクラス
-    HitChecker_Collider m_bodyCollider = null;
-    public HitChecker_Collider bodyCollider { get { return m_bodyCollider; } }
+    // 当たり判定の管理クラス
+    private FighterCollisionManager m_collisionManager = new FighterCollisionManager();
+    public override ICollisionManager collisionManager => m_collisionManager;
 
     // ダッシュエフェクトの制御クラス
     DashAnimeController m_dashAnimeCs = null;
-    public DashAnimeController dashAnimeCs { get { return m_dashAnimeCs; } }
-
-    //状態遷移を管理するステートマシーン
-    private StateMachine<Fighter> m_stateMachine = null;
-    public StateMachine<Fighter> stateMachine { get { return m_stateMachine; } }
-
-    //ステート（呼吸の状態）
-    [SerializeField]
-    private FighterIdele m_ideleState = new FighterIdele();
-    public FighterIdele ideleState { get { return m_ideleState; } }
-
-    //ステート（歩く状態）
-    [SerializeField]
-    private FighterWalk m_walkState = new FighterWalk();
-    public FighterWalk walkState { get { return m_walkState; } }
-
-    //ステート（ジャンプ状態）
-    [SerializeField]
-    private FighterJump m_jumpState = new FighterJump();
-    public FighterJump jumpState { get { return m_jumpState; } }
-
-    //ステート（落下状態）
-    [SerializeField]
-    private FighterFall m_fallState = new FighterFall();
-    public FighterFall fallState { get { return m_fallState; } }
-
-    //ステート（しゃがむ状態）
-    [SerializeField]
-    private FighterCrounch m_crounchState = new FighterCrounch();
-    public FighterCrounch crounchState { get { return m_crounchState; } }
-
-    //ステート（パンチ状態）
-    [SerializeField]
-    private FighterPunch m_punchState = new FighterPunch();
-    public FighterPunch punchState { get { return m_punchState; } }
-
-    //ステート（キック状態）
-    [SerializeField]
-    private FighterKick m_kickState = new FighterKick();
-    public FighterKick kickState { get { return m_kickState; } }
-
-    //ステート（しゃがみ蹴り状態）
-    [SerializeField]
-    private FighterCrouchKick m_crouchKickState = new FighterCrouchKick();
-    public FighterCrouchKick crouchKickState { get { return m_crouchKickState; } }
-
-    //ステート（空中蹴り状態）
-    [SerializeField]
-    private FighterFlyingKick m_flyingKickState = new FighterFlyingKick();
-    public FighterFlyingKick flyingKickState { get { return m_flyingKickState; } }
-
+    public DashAnimeController dashAnimeCs => m_dashAnimeCs;
 
     /// <summary>
     /// キャラクターの初期化
     /// </summary>
-    public override void InitCharacter() 
+    public override void InitCharacter(IControl controller) 
     {
-        //キャラクターの初期化処理
-        base.InitCharacter();
+        // キャラクターの初期化処理
+        base.InitCharacter(controller);
 
-        //処理の順番を設定する
-        orderBy = CharaManager.ORDER_CHARACTER.FIGHTER;
+        // 処理の順番を設定する
+        m_order = CharaManager.ORDER_CHARACTER.FIGHTER;
 
-        //ステートマシーンを生成する
-        m_stateMachine = new StateMachine<Fighter>(this, m_ideleState);
+        // ステートの管理クラスを初期化する
+        m_stateManager.InitState(this);
 
-        //子供にアタッチされている当たり判定用のスクリプトを取得する
-        m_bodyCollider = transform.GetChild((int)CHILD_OBJECT.BODY).gameObject.GetComponent<HitChecker_Collider>();
-        m_armCollider = transform.GetChild((int)CHILD_OBJECT.ARM).gameObject.GetComponent<HitChecker_Collider>();
-        m_footCollider = transform.GetChild((int)CHILD_OBJECT.FOOT).gameObject.GetComponent<HitChecker_Collider>();
-        m_kickCollider = transform.GetChild((int)CHILD_OBJECT.KICK).gameObject.GetComponent<HitChecker_Collider>();
+        // 当たり判定の管理クラスを初期化する
+        m_collisionManager.InitCollision(this);
 
         // ダッシュアニメーションの制御クラスを取得する
-        m_dashAnimeCs = m_footCollider.transform.GetChild(0).gameObject.GetComponent<DashAnimeController>();
+        m_dashAnimeCs = m_collisionManager.footCollider.transform.GetChild(0).gameObject.GetComponent<DashAnimeController>();
         m_dashAnimeCs.StopAnimation();
     }
 
@@ -137,8 +77,8 @@ public class Fighter : Hero
     /// </summary>
     public override void UpdateCharacter()
     {
-        //ステートマシーンの更新処理
-        m_stateMachine.UpdateState();
+        // ステートの管理クラスの更新処理
+        m_stateManager.UpdateState();
 
         //キャラクターの更新処理
         base.UpdateCharacter();
@@ -150,8 +90,8 @@ public class Fighter : Hero
     /// </summary>
     public override void FixedUpdateCharacter()
     {
-        //ステートマシーンの更新処理
-        m_stateMachine.FixedUpdateState();
+        // ステートの管理クラスの更新処理
+        m_stateManager.FixedUpdateState();
 
         //キャラクターの更新処理
         base.FixedUpdateCharacter();
@@ -163,8 +103,8 @@ public class Fighter : Hero
     /// </summary>
     public override void LateUpdateCharacter()
     {
-        //ステートマシーンの更新処理
-        m_stateMachine.LateUpdateState();
+        // ステートの管理クラスの更新処理
+        m_stateManager.LateUpdateState();
 
         //キャラクターの更新処理
         base.LateUpdateCharacter();

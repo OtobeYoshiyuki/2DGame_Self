@@ -62,7 +62,7 @@ namespace OtobeLib
         public static void UnBind(T service)
         {
             //登録しているインスタンスが同じ場合、解除する
-            if (s_instance == service) s_instance = null;
+            if (s_instance == service) { s_instance = null; }
         }
 
         /// <summary>
